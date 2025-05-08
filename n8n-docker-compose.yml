@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "5678:5678"
+#    environment:
+#      - WEBHOOK_URL=https://nuestro.dominio.com/ # Cambia esto por tu dominio o IP pública
+    volumes:
+      - ./data:/home/node/.n8n
+    restart: unless-stopped
