@@ -1,0 +1,88 @@
+{
+  "name": "Agente Motivador Punk",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "read",
+        "sheetId": "TU_SPREADSHEET_ID",
+        "range": "Proyectos!A2:G",
+        "valueRenderMode": "UNFORMATTED_VALUE"
+      },
+      "id": "Google Sheets",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [300, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": "TU_CREDENCIAL_GOOGLE"
+      }
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"model\": \"deepseek/deepseek-r1:free\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Eres un coach motivacional con estilo punk y rebelde. Motiva al usuario a terminar su proyecto: '{{Proyecto}}'. Descripción: {{Descripción}}. Fecha límite: {{Fecha límite}}. Progreso actual: {{Progreso}}%. Personalidad: {{Personalidad}}. Nivel de presión: {{Nivel presión}}/5. No uses más de 3 frases.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Proyecto: {{$json[\"0\"]}}\\nDescripción: {{$json[\"1\"]}}\\nFecha límite: {{$json[\"2\"]}}\\nProgreso: {{$json[\"3\"]}}\\nEstado: {{$json[\"4\"]}}\\nPersonalidad: {{$json[\"5\"]}}\\nNivel presión: {{$json[\"6\"]}}\"\n    }\n  ]\n}",
+        "headerParametersJson": "={\n  \"Authorization\": \"Bearer TU_API_KEY_OPENROUTER\",\n  \"Content-Type\": \"application/json\"\n}"
+      },
+      "id": "Mensaje IA Punk",
+      "name": "Mensaje IA Punk",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "TU_TELEGRAM_CHAT_ID",
+        "text": "🤖 <b>Motivación punk para tu proyecto:</b>\n<b>{{$node[\"Google Sheets\"].json[\"0\"]}}</b>\n\n{{$node[\"Mensaje IA Punk\"].json[\"choices\"][0][\"message\"][\"content\"]}}\n\nProgreso actual: {{$node[\"Google Sheets\"].json[\"3\"]}}%\nFecha límite: {{$node[\"Google Sheets\"].json[\"2\"]}}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "Enviar Telegram",
+      "name": "Enviar Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "credentials": {
+        "telegramApi": "TU_TELEGRAM_API"
+      }
+    }
+  ],
+  "connections": {
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Mensaje IA Punk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje IA Punk": {
+      "main": [
+        [
+          {
+            "node": "Enviar Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "tags": [
+    {
+      "name": "motivacion"
+    },
+    {
+      "name": "punk"
+    }
+  ]
+}
