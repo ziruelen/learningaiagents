@@ -1,0 +1,160 @@
+{
+  "name": "spammer rss telegram plus",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 5,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "feedUrl": "https://www.eldiarioia.es/feed"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -780,
+        -180
+      ],
+      "id": "da786ba8-413b-458e-99ee-6998c8b40756",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"canales\": [\n    \"-816150585\",\n   \"-4603578280\"\n  ],\n  \"link\": \"{{ $json.link }}\"\n}\n ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -540,
+        -180
+      ],
+      "id": "5c3bade4-e8e2-4cce-bedd-d7504a161465",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "canales",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        -180
+      ],
+      "id": "4f532d1e-4855-46a7-a2be-19cc55e0650e",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        20,
+        -180
+      ],
+      "id": "97ecb2c0-c201-4d06-a058-803e552f0917",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "command": "=./enviar_telegram.py {{ $json.canales }} \"{{ $json.link }}\"",
+        "cwd": "/home/z/telethon"
+      },
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -40
+      ],
+      "id": "97906191-6d2c-4e7e-a24a-f62839d52ced",
+      "name": "Execute a command",
+      "credentials": {
+        "sshPassword": {
+          "id": "eD32QWOh870ysEV0",
+          "name": "sobremesa"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Execute a command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a command": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d0990f4f-4e14-460b-ac22-639684e303eb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0b54d66c302c2c353590c1f434cae031f5ae72ef14dd5a5fbc2f64e09ba9ef99"
+  },
+  "id": "WDhZCLki0KeYZmhk",
+  "tags": []
+}
