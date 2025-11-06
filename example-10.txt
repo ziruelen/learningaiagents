@@ -1,6 +1,0 @@
-Allow IPs:
-  192.168.1.0/24  (red local)
-  100.64.0.0/10   (Tailscale)
-  
-Deny IPs:
-  0.0.0.0/0  (bloquear todo lo demás)

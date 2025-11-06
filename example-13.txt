@@ -1,9 +1,0 @@
-Domain: ha.tudominio.com
-Forward Hostname: homeassistant
-Forward Port: 8123
-☑ Websockets Support
-☐ Block Common Exploits (desactivar - causa problemas con HA)
-
-Custom Nginx Configuration:
-client_max_body_size 50M;
-proxy_buffering off;

@@ -1,97 +1,79 @@
-# Nginx Proxy Manager: Reverse Proxy con UI Visual y SSL Automático (Guía Completa 2025)
+# 🤖 Learning AI Agents - Código de Ejemplo
 
-## Descripción
+Repositorio de código de ejemplo para artículos de **[El Diario IA](https://www.eldiarioia.es)**.
 
-Ejemplos de código y configuraciones del artículo **"Nginx Proxy Manager: Reverse Proxy con UI Visual y SSL Automático (Guía Completa 2025)"** publicado en [ElDiarioIA.es](https://www.eldiarioia.es/?p=2248).
-
-## Archivos Incluidos
-
-- `script.sh`
-- `docker-compose.yml`
-- `config.yml`
-- `script.sh`
-- `example-4.txt`
-- `example-5.txt`
-- `example-6.txt`
-- `example-7.txt`
-- `example-8.txt`
-- `example-9.txt`
-- `example-10.txt`
-- `example-11.txt`
-- `example-12.txt`
-- `example-13.txt`
-- `example-14.txt`
-- `example-15.txt`
-- `example-16.txt`
-- `example-17.txt`
-- `config.yml`
-- `example-19.txt`
-- `config.yml`
-- `script.sh`
-- `config.yml`
-- `backup.sh`
-- `script.sh`
-- `nginx.conf`
-- `example-26.txt`
-- `example-27.txt`
-- `nginx.conf`
-- `example-29.txt`
-- `script.sh`
-- `script.sh`
-- `script.sh`
-- `nginx.conf`
-- `script.sh`
-- `script.sh`
-- `script.sh`
-- `example-37.txt`
-- `example-38.txt`
-- `example-39.txt`
-- `docker-compose.yml`
-- `example-41.txt`
-- `example-42.txt`
-- `script.sh`
-- `config.yml`
-- `config.yml`
-- `example-46.txt`
-- `script.sh`
-- `example-48.txt`
-- `example-49.txt`
-- `config.yml`
-- `script.sh`
-- `example-52.txt`
-- `nginx.conf`
-
-
-## Uso
-
-### Requisitos
-- Docker instalado
-- Docker Compose instalado
-
-### Instalación Rápida
-
-```bash
-# Descargar archivos
-git clone https://github.com/ziruelen/learningaiagents.git
-cd learningaiagents//
-
-# Si hay docker-compose.yml:
-docker-compose up -d
-```
-
-## Artículo Completo
-
-Lee el tutorial completo con explicaciones detalladas en:
-🔗 [Nginx Proxy Manager: Reverse Proxy con UI Visual y SSL Automático (Guía Completa 2025)](https://www.eldiarioia.es/?p=2248)
-
-## Soporte
-
-Si tienes dudas:
-- 💬 Comenta en el artículo
-- 📧 Email: ayuda@eldiarioia.es
-- 🐦 Twitter: @eldiarioia
+> "El blog donde la IA y el humano aprenden juntos"
 
 ---
 
-**Repositorio:** https://github.com/ziruelen/learningaiagents  
-**Blog:** https://www.eldiarioia.es  
+## 📂 Estructura
+
+```
+learningaiagents/
+├── n8n/                      # Automatización con n8n
+│   ├── docker-compose.yml
+│   ├── motivacion.json
+│   └── spammer-rss-telegram.json
+│
+├── nginx-proxy-manager/      # Reverse Proxy y SSL
+│   ├── docker-compose.yml
+│   └── nginx.conf
+│
+├── docker/                   # Docker y contenedores
+│   ├── docker-compose.yml
+│   └── install_docker_with_compose.sh
+│
+└── scripts/                  # Scripts y utilidades
+    ├── backup.sh
+    ├── enviar_telegram_telethon.py
+    └── sacar_ids_telethon.py
+```
+
+---
+
+## 🎯 Cómo Usar Este Repo
+
+**Cada carpeta** corresponde a un tema específico y contiene:
+- ✅ Código funcional copy-paste
+- ✅ README.md con contexto
+- ✅ Links a artículos relacionados
+
+**Busca por tema:**
+- Automatización → [`n8n/`](./n8n/)
+- Reverse Proxy → [`nginx-proxy-manager/`](./nginx-proxy-manager/)
+- Docker → [`docker/`](./docker/)
+- Scripts → [`scripts/`](./scripts/)
+
+---
+
+## 📖 Artículos Destacados
+
+### Automatización
+- [Automatización con n8n: 20 Workflows Listos para Usar (2025)](https://www.eldiarioia.es/2025/10/30/automatizacion-con-n8n-20-workflows-listos-para-usar-2025/)
+- [n8n Database Workflows: PostgreSQL, MySQL, MongoDB](https://www.eldiarioia.es/2025/11/06/n8n-database-workflows-postgresql-mysql-mongodb-tutorial-2025/)
+
+### Homelab
+- [Docker Compose: De 0 a Homelab Completo en 2025](https://www.eldiarioia.es/2025/10/10/docker-compose-de-0-a-homelab-completo-en-2025/)
+- [Nginx Proxy Manager: UI Visual para Reverse Proxy](https://www.eldiarioia.es/2025/11/06/nginx-proxy-manager-ui-visual-para-reverse-proxy-guia-2025/)
+
+### IA y ML
+- [Ollama Web Search + Qwen3-VL: Tu ChatGPT Local](https://www.eldiarioia.es/2025/11/01/ollama-web-search-qwen3-vl-tu-chatgpt-local-con-internet-y-vision-guia-completa-2025/)
+
+---
+
+## 🔄 Actualizaciones
+
+Este repo se actualiza automáticamente con cada artículo nuevo publicado.
+
+**Última actualización:** Noviembre 2025
+
+---
+
+## 📧 Contacto
+
+- **Blog:** [eldiarioia.es](https://www.eldiarioia.es)
+- **GitHub:** [@ziruelen](https://github.com/ziruelen)
+
+---
+
+**Licencia:** MIT - Úsalo libremente, aprende y comparte 🚀

@@ -1,5 +1,0 @@
-Streams → Add Stream:
-  Incoming Port: 3306
-  Forwarding Host: mysql-server
-  Forwarding Port: 3306
-  TCP: ☑

@@ -1,3 +1,0 @@
-Allow: 10.8.0.0/24  (OpenVPN)
-Allow: 100.64.0.0/10 (Tailscale)
-Deny: 0.0.0.0/0

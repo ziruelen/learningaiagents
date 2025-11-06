@@ -1,1 +1,0 @@
-SSL Certificate: (select) *.tudominio.com

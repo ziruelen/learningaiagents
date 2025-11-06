@@ -1,5 +1,0 @@
-Incoming Port: 5432
-Forwarding Host: postgres (contenedor Docker)
-Forwarding Port: 5432
-TCP Forwarding: ☑
-UDP Forwarding: ☐

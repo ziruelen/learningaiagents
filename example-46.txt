@@ -1,2 +1,0 @@
-Forward Hostname: backend  (IPv4)
-IPv6: ☑ Support IPv6
