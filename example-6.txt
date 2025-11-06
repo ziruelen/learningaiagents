@@ -1,0 +1,13 @@
+Domain Names:
+  *.tudominio.com
+  tudominio.com  (incluir root también)
+
+Email: tu@email.com
+I Agree to the Let's Encrypt Terms of Service: ☑
+
+DNS Provider: Cloudflare
+
+Credentials File Content:
+dns_cloudflare_api_token = <TU_TOKEN_CLOUDFLARE>
+
+Propagation Seconds: 120 (tiempo para DNS propagation)

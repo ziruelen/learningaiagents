@@ -1,0 +1,2 @@
+Proxy Host → Details tab:
+☑ Websockets Support (activar)

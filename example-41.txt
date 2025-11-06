@@ -1,0 +1,4 @@
+app.com/           → Frontend React
+app.com/api/       → Backend API
+app.com/admin/     → Admin Panel
+app.com/docs/      → Documentation

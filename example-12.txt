@@ -1,0 +1,5 @@
+Domain: portainer.tudominio.com
+Forward Hostname: portainer (contenedor Docker)
+Forward Port: 9000
+☑ Block Common Exploits
+☑ Websockets Support (CRÍTICO para Portainer)

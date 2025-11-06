@@ -1,0 +1,9 @@
+Domain Names: old-domain.com, www.old-domain.com
+Scheme: https
+Forward Domain/IP: new-domain.com
+
+Redirection Code:
+  ○ 301 Permanent (SEO-friendly, recomendado)
+  ○ 302 Temporary
+
+Preserve Path: ☑ (mantener /path en redirect)

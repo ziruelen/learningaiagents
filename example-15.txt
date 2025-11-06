@@ -1,0 +1,8 @@
+Domain: n8n.tudominio.com
+Forward Hostname: n8n
+Forward Port: 5678
+☑ Websockets Support
+
+Custom Config:
+client_max_body_size 50M;
+proxy_read_timeout 300s;

@@ -1,0 +1,9 @@
+SSL Certificate: Request a new SSL Certificate
+
+Force SSL: ☑ (redirect HTTP → HTTPS)
+HTTP/2 Support: ☑
+HSTS Enabled: ☑ (seguridad adicional)
+HSTS Subdomains: ☐ (solo si aplica)
+
+Email Address for Let's Encrypt: tu@email.com
+I Agree to the Let's Encrypt Terms of Service: ☑

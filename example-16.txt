@@ -1,0 +1,15 @@
+Domain: jellyfin.tudominio.com
+Forward Hostname: jellyfin
+Forward Port: 8096
+
+Custom Config (optimizado para streaming):
+proxy_buffering off;
+proxy_request_buffering off;
+proxy_http_version 1.1;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "upgrade";
+
+# Timeouts largos para streaming
+proxy_read_timeout 3600s;
+proxy_connect_timeout 3600s;
+send_timeout 3600s;

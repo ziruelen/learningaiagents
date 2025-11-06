@@ -1,0 +1,7 @@
+portainer.home.lan     → Portainer (9000)
+n8n.home.lan           → n8n Automation (5678)
+grafana.home.lan       → Grafana Dashboards (3000)
+uptime.home.lan        → Uptime Kuma (3001)
+jellyfin.home.lan      → Jellyfin Media (8096)
+books.home.lan         → Calibre Web (8083)
+home.home.lan          → Home Assistant (8123)
