@@ -1,0 +1,375 @@
+{
+  "name": "Notificaciones Inteligentes Priorizadas",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ha-event-trigger",
+      "name": "Eventos Home Assistant",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "ha-events",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extraer información del evento\nconst event = $input.item.json;\n\nreturn {\n  json: {\n    tipo_evento: event.event_type,\n    entidad: event.data.entity_id || 'desconocido',\n    estado_nuevo: event.data.new_state?.state || '',\n    estado_anterior: event.data.old_state?.state || '',\n    timestamp: event.time_fired,\n    contexto: JSON.stringify(event.data)\n  }\n};"
+      },
+      "id": "extract-event",
+      "name": "Extraer Info Evento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "domain": "sensor",
+        "service": "state",
+        "entityId": "sensor.time"
+      },
+      "id": "get-time",
+      "name": "Obtener Hora Actual",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [690, 200],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "binary_sensor",
+        "service": "state",
+        "entityId": "binary_sensor.modo_no_molestar"
+      },
+      "id": "get-dnd",
+      "name": "Verificar No Molestar",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [690, 300],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://ollama:11434/api/generate",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3.2\",\n  \"prompt\": \"Eres un clasificador de eventos domóticos. Evento: {{$node['Extraer Info Evento'].json.tipo_evento}}, Entidad: {{$node['Extraer Info Evento'].json.entidad}}, Cambio: {{$node['Extraer Info Evento'].json.estado_anterior}} → {{$node['Extraer Info Evento'].json.estado_nuevo}}. Hora: {{$node['Obtener Hora Actual'].json.state}}, No Molestar: {{$node['Verificar No Molestar'].json.state}}. Clasifica urgencia y decide si notificar. Responde SOLO JSON: {\\\"prioridad\\\": \\\"critica/alta/media/baja\\\", \\\"notificar\\\": true/false, \\\"mensaje\\\": \\\"texto_claro\\\", \\\"accion_sugerida\\\": \\\"texto_o_null\\\"}\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "ollama-classify",
+      "name": "IA Clasificar Urgencia",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = JSON.parse($input.item.json.response);\nconst classification = JSON.parse(response);\n\nreturn {\n  json: {\n    ...classification,\n    evento_original: $input.item.json\n  }\n};"
+      },
+      "id": "parse-classification",
+      "name": "Parsear Clasificación",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.notificar}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "should-notify",
+      "name": "¿Debe notificar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.prioridad}}",
+              "value2": "critica"
+            }
+          ]
+        }
+      },
+      "id": "check-priority",
+      "name": "Router Prioridad",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [1570, 300]
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "mobile_app",
+        "serviceAttributes": "={\"title\": \"🚨 CRÍTICO\", \"message\": \"{{$json.mensaje}}\", \"data\": {\"priority\": \"high\", \"ttl\": 0, \"channel\": \"alarm_stream\"}}"
+      },
+      "id": "notify-critical",
+      "name": "Notificación Crítica",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 200],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "mobile_app",
+        "serviceAttributes": "={\"title\": \"⚠️ Importante\", \"message\": \"{{$json.mensaje}}\"}"
+      },
+      "id": "notify-high",
+      "name": "Notificación Alta",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 300],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "persistent_notification",
+        "serviceAttributes": "={\"title\": \"ℹ️ Info\", \"message\": \"{{$json.mensaje}}\"}"
+      },
+      "id": "notify-normal",
+      "name": "Notificación Normal",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 400],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.accion_sugerida}}",
+              "operation": "notEqual",
+              "value2": "null"
+            }
+          ]
+        }
+      },
+      "id": "has-action",
+      "name": "¿Tiene acción?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [2010, 300]
+    },
+    {
+      "parameters": {
+        "domain": "script",
+        "service": "turn_on",
+        "entityId": "script.ejecutar_accion_ia",
+        "serviceAttributes": "={\"variables\": {\"accion\": \"{{$json.accion_sugerida}}\"}}"
+      },
+      "id": "execute-action",
+      "name": "Ejecutar Acción Sugerida",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [2230, 300],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Eventos Home Assistant": {
+      "main": [
+        [
+          {
+            "node": "Extraer Info Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer Info Evento": {
+      "main": [
+        [
+          {
+            "node": "Obtener Hora Actual",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Verificar No Molestar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Hora Actual": {
+      "main": [
+        [
+          {
+            "node": "IA Clasificar Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar No Molestar": {
+      "main": [
+        [
+          {
+            "node": "IA Clasificar Urgencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Clasificar Urgencia": {
+      "main": [
+        [
+          {
+            "node": "Parsear Clasificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Clasificación": {
+      "main": [
+        [
+          {
+            "node": "¿Debe notificar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Debe notificar?": {
+      "main": [
+        [
+          {
+            "node": "Router Prioridad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router Prioridad": {
+      "main": [
+        [
+          {
+            "node": "Notificación Crítica",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificación Alta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificación Normal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificación Crítica": {
+      "main": [
+        [
+          {
+            "node": "¿Tiene acción?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificación Alta": {
+      "main": [
+        [
+          {
+            "node": "¿Tiene acción?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificación Normal": {
+      "main": [
+        [
+          {
+            "node": "¿Tiene acción?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Tiene acción?": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Acción Sugerida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-15T00:00:00.000Z",
+  "versionId": "1"
+}

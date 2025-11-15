@@ -1,0 +1,314 @@
+{
+  "name": "Control por Voz Natural con IA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "voice-command",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-voice",
+      "name": "Webhook Voice",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "voice-command"
+    },
+    {
+      "parameters": {
+        "url": "http://ollama:11434/api/generate",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3.2\",\n  \"prompt\": \"Eres un asistente de domótica. El usuario dice: '{{$json.body.text}}'. Interpreta la intención y responde SOLO con JSON: {\\\"accion\\\": \\\"turn_on/turn_off/set_temperature/set_brightness\\\", \\\"dispositivo\\\": \\\"nombre_entidad\\\", \\\"valor\\\": numero_si_aplica, \\\"confirmacion\\\": \\\"mensaje_natural\\\"}. Si no entiendes, pon accion: null.\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "ollama-interpret",
+      "name": "Interpretar con IA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = JSON.parse($input.item.json.response);\nconst intent = JSON.parse(response);\n\nreturn {\n  json: {\n    accion: intent.accion,\n    dispositivo: intent.dispositivo,\n    valor: intent.valor,\n    confirmacion: intent.confirmacion,\n    original: $input.item.json.body.text\n  }\n};"
+      },
+      "id": "parse-intent",
+      "name": "Parsear Intención",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.accion}}",
+              "operation": "notEqual",
+              "value2": "null"
+            }
+          ]
+        }
+      },
+      "id": "check-valid",
+      "name": "¿Intención válida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.accion}}",
+              "value2": "turn_on"
+            }
+          ]
+        }
+      },
+      "id": "route-action",
+      "name": "Router Acción",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "domain": "={{$json.dispositivo.split('.')[0]}}",
+        "service": "turn_on",
+        "entityId": "={{$json.dispositivo}}"
+      },
+      "id": "execute-turn-on",
+      "name": "Encender",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1350, 100],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "={{$json.dispositivo.split('.')[0]}}",
+        "service": "turn_off",
+        "entityId": "={{$json.dispositivo}}"
+      },
+      "id": "execute-turn-off",
+      "name": "Apagar",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1350, 200],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "climate",
+        "service": "set_temperature",
+        "entityId": "={{$json.dispositivo}}",
+        "serviceAttributes": "={\"temperature\": {{$json.valor}}}"
+      },
+      "id": "execute-temp",
+      "name": "Ajustar Temperatura",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1350, 300],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "light",
+        "service": "turn_on",
+        "entityId": "={{$json.dispositivo}}",
+        "serviceAttributes": "={\"brightness_pct\": {{$json.valor}}}"
+      },
+      "id": "execute-brightness",
+      "name": "Ajustar Brillo",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1350, 400],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"success\": true, \"message\": \"{{$json.confirmacion}}\"}",
+        "options": {}
+      },
+      "id": "respond-success",
+      "name": "Responder Éxito",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1570, 250]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"success\": false, \"message\": \"No entendí el comando\"}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-error",
+      "name": "Responder Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1130, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Voice": {
+      "main": [
+        [
+          {
+            "node": "Interpretar con IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar con IA": {
+      "main": [
+        [
+          {
+            "node": "Parsear Intención",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Intención": {
+      "main": [
+        [
+          {
+            "node": "¿Intención válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Intención válida?": {
+      "main": [
+        [
+          {
+            "node": "Router Acción",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router Acción": {
+      "main": [
+        [
+          {
+            "node": "Encender",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Apagar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ajustar Temperatura",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ajustar Brillo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encender": {
+      "main": [
+        [
+          {
+            "node": "Responder Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apagar": {
+      "main": [
+        [
+          {
+            "node": "Responder Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar Temperatura": {
+      "main": [
+        [
+          {
+            "node": "Responder Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar Brillo": {
+      "main": [
+        [
+          {
+            "node": "Responder Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-15T00:00:00.000Z",
+  "versionId": "1"
+}

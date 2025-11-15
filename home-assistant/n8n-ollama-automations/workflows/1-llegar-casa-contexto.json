@@ -1,0 +1,314 @@
+{
+  "name": "Automatización Llegada Casa con Contexto IA",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "webhook-trigger",
+      "name": "Home Assistant Trigger",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "home-arrival",
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event.data.entity_id}}",
+              "value2": "person.usuario"
+            }
+          ]
+        }
+      },
+      "id": "check-person",
+      "name": "¿Es mi persona?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "domain": "sensor",
+        "service": "state",
+        "entityId": "weather.home"
+      },
+      "id": "get-weather",
+      "name": "Obtener Clima",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [690, 200]
+    },
+    {
+      "parameters": {
+        "domain": "sensor",
+        "service": "state",
+        "entityId": "sensor.interior_temperature"
+      },
+      "id": "get-temp",
+      "name": "Obtener Temperatura",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "domain": "sensor",
+        "service": "state",
+        "entityId": "sensor.time"
+      },
+      "id": "get-time",
+      "name": "Obtener Hora",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [690, 400]
+    },
+    {
+      "parameters": {
+        "url": "http://ollama:11434/api/generate",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3.2\",\n  \"prompt\": \"Eres un asistente domótico. El usuario acaba de llegar a casa. Clima exterior: {{$node['Obtener Clima'].json.state}}°C, Temperatura interior: {{$node['Obtener Temperatura'].json.state}}°C, Hora: {{$node['Obtener Hora'].json.state}}. ¿Qué acciones recomiendas? Responde SOLO con JSON: {\\\"luces\\\": true/false, \\\"calefaccion\\\": true/false, \\\"temperatura_objetivo\\\": numero, \\\"mensaje\\\": \\\"texto\\\"}\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "ollama-decision",
+      "name": "Consultar Ollama",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "mode": "jsonToPairedItem",
+        "value": "={{JSON.parse($json.response).mensaje}}"
+      },
+      "id": "parse-response",
+      "name": "Parsear Respuesta IA",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{JSON.parse($json.response).luces}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-lights",
+      "name": "¿Encender luces?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1350, 200]
+    },
+    {
+      "parameters": {
+        "domain": "light",
+        "service": "turn_on",
+        "entityId": "light.salon"
+      },
+      "id": "turn-on-lights",
+      "name": "Encender Luces",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1570, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{JSON.parse($json.response).calefaccion}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-heating",
+      "name": "¿Activar calefacción?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1350, 400]
+    },
+    {
+      "parameters": {
+        "domain": "climate",
+        "service": "set_temperature",
+        "entityId": "climate.termostato",
+        "serviceAttributes": "={\"temperature\": {{JSON.parse($json.response).temperatura_objetivo}}}"
+      },
+      "id": "set-heating",
+      "name": "Ajustar Calefacción",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1570, 400]
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "mobile_app",
+        "serviceAttributes": "={\"message\": \"{{JSON.parse($json.response).mensaje}}\"}"
+      },
+      "id": "notify",
+      "name": "Enviar Notificación",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 300]
+    }
+  ],
+  "connections": {
+    "Home Assistant Trigger": {
+      "main": [
+        [
+          {
+            "node": "¿Es mi persona?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Es mi persona?": {
+      "main": [
+        [
+          {
+            "node": "Obtener Clima",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Obtener Temperatura",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Obtener Hora",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Clima": {
+      "main": [
+        [
+          {
+            "node": "Consultar Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Temperatura": {
+      "main": [
+        [
+          {
+            "node": "Consultar Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Obtener Hora": {
+      "main": [
+        [
+          {
+            "node": "Consultar Ollama",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar Ollama": {
+      "main": [
+        [
+          {
+            "node": "Parsear Respuesta IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Respuesta IA": {
+      "main": [
+        [
+          {
+            "node": "¿Encender luces?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "¿Activar calefacción?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Encender luces?": {
+      "main": [
+        [
+          {
+            "node": "Encender Luces",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encender Luces": {
+      "main": [
+        [
+          {
+            "node": "Enviar Notificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Activar calefacción?": {
+      "main": [
+        [
+          {
+            "node": "Ajustar Calefacción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ajustar Calefacción": {
+      "main": [
+        [
+          {
+            "node": "Enviar Notificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-15T00:00:00.000Z",
+  "versionId": "1"
+}

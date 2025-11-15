@@ -1,0 +1,444 @@
+{
+  "name": "Detección Anomalías Seguridad con IA",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "schedule-15min",
+      "name": "Cada 15 Minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "domain": "sensor",
+        "service": "history",
+        "entityId": "sensor.consumo_red",
+        "serviceAttributes": "{\"hours\": 1}"
+      },
+      "id": "get-network",
+      "name": "Historial Red",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [470, 200],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "binary_sensor",
+        "service": "history",
+        "entityId": "binary_sensor.puertas_ventanas",
+        "serviceAttributes": "{\"hours\": 1}"
+      },
+      "id": "get-doors",
+      "name": "Historial Puertas",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [470, 300],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "sensor",
+        "service": "history",
+        "entityId": "sensor.intentos_login",
+        "serviceAttributes": "{\"hours\": 1}"
+      },
+      "id": "get-logins",
+      "name": "Historial Logins",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [470, 400],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Agregar métricas de los historiales\nconst networkData = $node['Historial Red'].json;\nconst doorsData = $node['Historial Puertas'].json;\nconst loginsData = $node['Historial Logins'].json;\n\nreturn {\n  json: {\n    red_promedio: networkData.average || 0,\n    red_picos: networkData.peaks || 0,\n    puertas_cambios: doorsData.changes || 0,\n    puertas_abiertas_noche: doorsData.night_opens || 0,\n    intentos_login: loginsData.total || 0,\n    logins_fallidos: loginsData.failed || 0,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "aggregate-metrics",
+      "name": "Agregar Métricas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://ollama:11434/api/generate",
+        "method": "POST",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama3.2\",\n  \"prompt\": \"Eres un experto en seguridad del hogar. Analiza estas métricas de la última hora: Consumo red promedio: {{$json.red_promedio}}MB/s (picos: {{$json.red_picos}}), Cambios puertas/ventanas: {{$json.puertas_cambios}} (aperturas nocturnas: {{$json.puertas_abiertas_noche}}), Intentos login: {{$json.intentos_login}} (fallidos: {{$json.logins_fallidos}}). Detecta anomalías y evalúa riesgo. Responde SOLO JSON: {\\\"anomalia_detectada\\\": true/false, \\\"nivel_riesgo\\\": \\\"critico/alto/medio/bajo\\\", \\\"tipo_anomalia\\\": \\\"red/acceso/intrusion/normal\\\", \\\"descripcion\\\": \\\"explicacion\\\", \\\"acciones_recomendadas\\\": [\\\"accion1\\\", \\\"accion2\\\"]}\",\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "ollama-detect",
+      "name": "IA Detectar Anomalías",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = JSON.parse($input.item.json.response);\nconst analysis = JSON.parse(response);\n\nreturn {\n  json: {\n    ...analysis,\n    metricas_originales: $input.item.json\n  }\n};"
+      },
+      "id": "parse-analysis",
+      "name": "Parsear Análisis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.anomalia_detectada}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "has-anomaly",
+      "name": "¿Anomalía detectada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1350, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.nivel_riesgo}}",
+              "value2": "critico"
+            }
+          ]
+        }
+      },
+      "id": "check-risk",
+      "name": "Evaluar Nivel Riesgo",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [1570, 300]
+    },
+    {
+      "parameters": {
+        "domain": "script",
+        "service": "turn_on",
+        "entityId": "script.modo_seguridad_critico"
+      },
+      "id": "activate-critical",
+      "name": "Activar Modo Crítico",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 150],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "mobile_app",
+        "serviceAttributes": "={\"title\": \"🚨 ALERTA SEGURIDAD CRÍTICA\", \"message\": \"{{$json.descripcion}}\", \"data\": {\"priority\": \"high\", \"ttl\": 0, \"channel\": \"alarm_stream\", \"actions\": [{\"action\": \"llamar_policia\", \"title\": \"Llamar Policía\"}, {\"action\": \"revisar_camaras\", \"title\": \"Ver Cámaras\"}]}}"
+      },
+      "id": "notify-critical",
+      "name": "Alerta Crítica",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [2010, 150],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "camera",
+        "service": "snapshot",
+        "entityId": "camera.todas",
+        "serviceAttributes": "{\"filename\": \"/config/snapshots/alerta_{{$json.timestamp}}.jpg\"}"
+      },
+      "id": "capture-cameras",
+      "name": "Capturar Cámaras",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [2230, 150],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "mobile_app",
+        "serviceAttributes": "={\"title\": \"⚠️ Alerta Seguridad\", \"message\": \"{{$json.descripcion}}\"}"
+      },
+      "id": "notify-high",
+      "name": "Alerta Alta",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 300],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "notify",
+        "service": "persistent_notification",
+        "serviceAttributes": "={\"title\": \"ℹ️ Actividad Inusual\", \"message\": \"{{$json.descripcion}}\"}"
+      },
+      "id": "notify-medium",
+      "name": "Notificación Media",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [1790, 400],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "domain": "input_text",
+        "service": "set_value",
+        "entityId": "input_text.log_seguridad",
+        "serviceAttributes": "={\"value\": \"[{{$json.timestamp}}] {{$json.nivel_riesgo}}: {{$json.descripcion}}\"}"
+      },
+      "id": "log-event",
+      "name": "Registrar Evento",
+      "type": "n8n-nodes-base.homeAssistant",
+      "typeVersion": 1,
+      "position": [2010, 350],
+      "credentials": {
+        "homeAssistantApi": {
+          "id": "1",
+          "name": "Home Assistant Local"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Cada 15 Minutos": {
+      "main": [
+        [
+          {
+            "node": "Historial Red",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Historial Puertas",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Historial Logins",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Historial Red": {
+      "main": [
+        [
+          {
+            "node": "Agregar Métricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Historial Puertas": {
+      "main": [
+        [
+          {
+            "node": "Agregar Métricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Historial Logins": {
+      "main": [
+        [
+          {
+            "node": "Agregar Métricas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar Métricas": {
+      "main": [
+        [
+          {
+            "node": "IA Detectar Anomalías",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Detectar Anomalías": {
+      "main": [
+        [
+          {
+            "node": "Parsear Análisis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear Análisis": {
+      "main": [
+        [
+          {
+            "node": "¿Anomalía detectada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Anomalía detectada?": {
+      "main": [
+        [
+          {
+            "node": "Evaluar Nivel Riesgo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluar Nivel Riesgo": {
+      "main": [
+        [
+          {
+            "node": "Activar Modo Crítico",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta Alta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notificación Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Activar Modo Crítico": {
+      "main": [
+        [
+          {
+            "node": "Alerta Crítica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta Crítica": {
+      "main": [
+        [
+          {
+            "node": "Capturar Cámaras",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capturar Cámaras": {
+      "main": [
+        [
+          {
+            "node": "Registrar Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta Alta": {
+      "main": [
+        [
+          {
+            "node": "Registrar Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificación Media": {
+      "main": [
+        [
+          {
+            "node": "Registrar Evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-15T00:00:00.000Z",
+  "versionId": "1"
+}
