@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: 'host'
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /ruta/a/peliculas:/data/movies
+      - /ruta/a/series:/data/tvshows
+      - /ruta/a/musica:/data/music
+      - /dev/dri:/dev/dri  # ← Importante para Intel QuickSync
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    restart: unless-stopped
+
+# REQUISITOS PREVIOS:
+# 1. Verificar que tu CPU tiene QuickSync (Intel 6ª gen o superior)
+#    lscpu | grep -i "model name"
+#
+# 2. Verificar drivers iHD:
+#    ls /dev/dri/
+#    # Debe mostrar: card0, renderD128
+#
+# 3. En Jellyfin: Dashboard → Configuración → Reproducción → Habilitar transcodificación de hardware → Intel QuickSync (QSV)
+

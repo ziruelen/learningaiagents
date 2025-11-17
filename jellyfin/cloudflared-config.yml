@@ -1,0 +1,35 @@
+# Configuración Cloudflare Tunnel para Jellyfin
+# Guarda este archivo como ~/.cloudflared/config.yml
+# Luego ejecuta: cloudflared tunnel run jellyfin-tunnel
+
+tunnel: jellyfin-tunnel
+credentials-file: /home/usuario/.cloudflared/xxxxx.json
+
+ingress:
+  # Jellyfin
+  - hostname: jellyfin.tudominio.com
+    service: http://localhost:8096
+  
+  # Catch-all (debe ir al final)
+  - service: http_status:404
+
+# INSTRUCCIONES:
+# 1. Instalar cloudflared:
+#    curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+#    sudo mv cloudflared /usr/local/bin/
+#    sudo chmod +x /usr/local/bin/cloudflared
+#
+# 2. Autenticar:
+#    cloudflared tunnel login
+#
+# 3. Crear túnel:
+#    cloudflared tunnel create jellyfin-tunnel
+#
+# 4. Configurar DNS:
+#    cloudflared tunnel route dns jellyfin-tunnel jellyfin.tudominio.com
+#
+# 5. Ejecutar túnel:
+#    cloudflared tunnel run jellyfin-tunnel
+#
+# 6. En Jellyfin: Dashboard → Configuración → Red → Base URL: /
+

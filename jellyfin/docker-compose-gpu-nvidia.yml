@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: 'host'
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /ruta/a/peliculas:/data/movies
+      - /ruta/a/series:/data/tvshows
+      - /ruta/a/musica:/data/music
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,video,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+
+# REQUISITOS PREVIOS:
+# 1. Instalar nvidia-docker2:
+#    distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+#    curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+#    curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+#    sudo apt update && sudo apt install -y nvidia-docker2
+#    sudo systemctl restart docker
+#
+# 2. Verificar GPU accesible:
+#    docker run --rm --gpus all nvidia/cuda:11.0-base nvidia-smi
+#
+# 3. En Jellyfin: Dashboard → Configuración → Reproducción → Habilitar transcodificación de hardware → NVIDIA NVENC
+

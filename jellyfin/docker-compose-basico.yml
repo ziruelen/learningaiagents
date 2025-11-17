@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    network_mode: 'host'
+    volumes:
+      - ./config:/config
+      - ./cache:/cache
+      - /ruta/a/peliculas:/data/movies
+      - /ruta/a/series:/data/tvshows
+      - /ruta/a/musica:/data/music
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    restart: unless-stopped
+
+# INSTRUCCIONES:
+# 1. Reemplaza /ruta/a/peliculas, /ruta/a/series, /ruta/a/musica con tus rutas reales
+# 2. Ajusta PUID y PGID según tu usuario (id -u y id -g)
+# 3. Ajusta TZ según tu zona horaria
+# 4. Ejecuta: docker-compose -f docker-compose-basico.yml up -d
+# 5. Accede a http://localhost:8096
+
