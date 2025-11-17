@@ -1,0 +1,68 @@
+global:
+  checkNewVersion: true
+  sendAnonymousUsage: false
+
+# EntryPoints: Puntos de entrada del tráfico
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+
+# API: Dashboard de Traefik
+api:
+  dashboard: true
+  insecure: false  # Cambiar a true solo para desarrollo local
+
+# Providers: Fuentes de configuración
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false  # Solo expone servicios con traefik.enable=true
+    network: traefik-net
+    watch: true
+  file:
+    directory: "/config"
+    watch: true
+
+# Certificates Resolvers: Configuración de Let's Encrypt
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: tuemail@dominio.com  # Cambiar por tu email
+      storage: "/acme.json"
+      # HTTP Challenge (básico, requiere puerto 80 accesible)
+      httpChallenge:
+        entryPoint: web
+      # DNS Challenge para certificados wildcard (descomentar si usas Cloudflare)
+      # dnsChallenge:
+      #   provider: cloudflare
+      #   resolvers:
+      #     - "1.1.1.1:53"
+      #     - "8.8.8.8:53"
+
+# Logs
+log:
+  level: INFO
+  filePath: "/var/log/traefik/traefik.log"
+  format: json
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  format: json
+  bufferingSize: 100
+
+# Métricas (opcional, para Prometheus)
+# metrics:
+#   prometheus:
+#     entryPoint: metrics
+#     addEntryPointsLabels: true
+#     addServicesLabels: true
+#     addRoutersLabels: true
+

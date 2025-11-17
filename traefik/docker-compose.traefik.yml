@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v3.4
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - traefik-net
+    ports:
+      - "80:80"
+      - "443:443"
+      # Dashboard solo para desarrollo local (comentar en producción)
+      # - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yml:/traefik.yml:ro
+      - ./acme.json:/acme.json
+      - ./logs:/var/log/traefik
+      - ./config:/config
+    environment:
+      # Para DNS Challenge con Cloudflare (opcional)
+      # - CF_API_EMAIL=${CLOUDFLARE_EMAIL}
+      # - CF_API_KEY=${CLOUDFLARE_API_KEY}
+    labels:
+      - "traefik.enable=true"
+      # Dashboard accesible en https://traefik.tu-dominio.com
+      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      # Autenticación básica para el dashboard (generar con: htpasswd -nb usuario contraseña)
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$hash_aqui"
+      - "traefik.http.routers.traefik.middlewares=traefik-auth"
+
+networks:
+  traefik-net:
+    external: true
+

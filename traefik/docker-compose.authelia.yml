@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  authelia:
+    image: authelia/authelia:latest
+    container_name: authelia
+    restart: unless-stopped
+    volumes:
+      - ./authelia:/config
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      # Router para Authelia
+      - "traefik.http.routers.authelia.rule=Host(`auth.${DOMAIN}`)"
+      - "traefik.http.routers.authelia.entrypoints=websecure"
+      - "traefik.http.routers.authelia.tls.certresolver=letsencrypt"
+      # Service
+      - "traefik.http.services.authelia.loadbalancer.server.port=9091"
+
+  # Ejemplo: Servicio protegido con Authelia
+  servicio-protegido:
+    image: nginx:alpine
+    container_name: servicio-protegido
+    restart: unless-stopped
+    networks:
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.servicio-protegido.rule=Host(`servicio.${DOMAIN}`)"
+      - "traefik.http.routers.servicio-protegido.entrypoints=websecure"
+      - "traefik.http.routers.servicio-protegido.tls.certresolver=letsencrypt"
+      # Service
+      - "traefik.http.services.servicio-protegido.loadbalancer.server.port=80"
+      # Middleware: ForwardAuth con Authelia
+      - "traefik.http.middlewares.authelia-forward.forwardauth.address=http://authelia:9091/api/verify?rd=https://auth.${DOMAIN}/"
+      - "traefik.http.middlewares.authelia-forward.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
+      - "traefik.http.middlewares.authelia-forward.forwardauth.trustForwardHeader=true"
+      # Aplicar middleware al router
+      - "traefik.http.routers.servicio-protegido.middlewares=authelia-forward"
+
+networks:
+  traefik-net:
+    external: true
+
