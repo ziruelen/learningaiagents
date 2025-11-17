@@ -1,0 +1,47 @@
+{
+    email admin@example.com
+    log {
+        output file /var/log/caddy/access.log
+        format json
+        level INFO
+    }
+}
+
+# Servicio con autenticación básica
+# Generar hash: docker run --rm caddy:latest caddy hash-password
+private.example.com {
+    basicauth {
+        usuario $2a$14$hashedpasswordhere
+    }
+    reverse_proxy servicio:8080
+    encode gzip zstd
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    }
+}
+
+# Load balancing entre múltiples instancias
+app.example.com {
+    reverse_proxy servicio1:8080 servicio2:8080 servicio3:8080 {
+        lb_policy round_robin
+        health_uri /health
+        health_interval 10s
+        health_timeout 5s
+    }
+    encode gzip
+}
+
+# Wildcard subdomain
+*.example.com {
+    reverse_proxy {
+        to servicio:8080
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+    }
+    encode gzip
+}
+
