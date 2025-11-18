@@ -1,0 +1,108 @@
+{
+  "name": "Captura de Pantalla - n8n Playwright",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "schedule",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "goto",
+        "url": "https://example.com/dashboard",
+        "options": {
+          "waitUntil": "networkidle"
+        }
+      },
+      "id": "playwright-goto",
+      "name": "Playwright - Navegar",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "waitForLoadState",
+        "state": "networkidle"
+      },
+      "id": "playwright-wait",
+      "name": "Playwright - Esperar Carga",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "screenshot",
+        "options": {
+          "fullPage": true,
+          "path": "/tmp/screenshot-{{ $now.format('YYYY-MM-DD') }}.png"
+        }
+      },
+      "id": "playwright-screenshot",
+      "name": "Playwright - Capturar",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.example.com/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{ $binary.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "upload",
+      "name": "HTTP Request - Subir",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{"node": "Playwright - Navegar", "type": "main", "index": 0}]]
+    },
+    "Playwright - Navegar": {
+      "main": [[{"node": "Playwright - Esperar Carga", "type": "main", "index": 0}]]
+    },
+    "Playwright - Esperar Carga": {
+      "main": [[{"node": "Playwright - Capturar", "type": "main", "index": 0}]]
+    },
+    "Playwright - Capturar": {
+      "main": [[{"node": "HTTP Request - Subir", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-18T00:00:00.000Z",
+  "versionId": "1"
+}
+

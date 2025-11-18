@@ -1,0 +1,123 @@
+{
+  "name": "Automatización de Formulario - n8n Playwright",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "form-submit",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "form-automation"
+    },
+    {
+      "parameters": {
+        "operation": "goto",
+        "url": "https://example.com/contact",
+        "options": {
+          "waitUntil": "domcontentloaded"
+        }
+      },
+      "id": "playwright-goto",
+      "name": "Playwright - Navegar",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "fill",
+        "selector": "#name",
+        "text": "={{ $json.body.name }}"
+      },
+      "id": "playwright-fill-name",
+      "name": "Playwright - Rellenar Nombre",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "fill",
+        "selector": "#email",
+        "text": "={{ $json.body.email }}"
+      },
+      "id": "playwright-fill-email",
+      "name": "Playwright - Rellenar Email",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "click",
+        "selector": "button[type='submit']"
+      },
+      "id": "playwright-submit",
+      "name": "Playwright - Enviar",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "waitForSelector",
+        "selector": ".success-message",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "playwright-wait",
+      "name": "Playwright - Esperar Confirmación",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Formulario enviado correctamente\" } }}"
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "Playwright - Navegar", "type": "main", "index": 0}]]
+    },
+    "Playwright - Navegar": {
+      "main": [[{"node": "Playwright - Rellenar Nombre", "type": "main", "index": 0}]]
+    },
+    "Playwright - Rellenar Nombre": {
+      "main": [[{"node": "Playwright - Rellenar Email", "type": "main", "index": 0}]]
+    },
+    "Playwright - Rellenar Email": {
+      "main": [[{"node": "Playwright - Enviar", "type": "main", "index": 0}]]
+    },
+    "Playwright - Enviar": {
+      "main": [[{"node": "Playwright - Esperar Confirmación", "type": "main", "index": 0}]]
+    },
+    "Playwright - Esperar Confirmación": {
+      "main": [[{"node": "Respond to Webhook", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-18T00:00:00.000Z",
+  "versionId": "1"
+}
+

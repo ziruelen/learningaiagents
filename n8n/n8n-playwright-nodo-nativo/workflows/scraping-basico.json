@@ -1,0 +1,70 @@
+{
+  "name": "Scraping Básico - n8n Playwright",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "goto",
+        "url": "https://example.com",
+        "options": {
+          "waitUntil": "networkidle"
+        }
+      },
+      "id": "playwright-goto",
+      "name": "Playwright - Navegar",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getText",
+        "selector": "h1"
+      },
+      "id": "playwright-title",
+      "name": "Playwright - Obtener Título",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getText",
+        "selector": "p"
+      },
+      "id": "playwright-content",
+      "name": "Playwright - Obtener Contenido",
+      "type": "@n8n/n8n-nodes-langchain.playwright",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{"node": "Playwright - Navegar", "type": "main", "index": 0}]]
+    },
+    "Playwright - Navegar": {
+      "main": [[{"node": "Playwright - Obtener Título", "type": "main", "index": 0}]]
+    },
+    "Playwright - Obtener Título": {
+      "main": [[{"node": "Playwright - Obtener Contenido", "type": "main", "index": 0}]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-18T00:00:00.000Z",
+  "versionId": "1"
+}
+
