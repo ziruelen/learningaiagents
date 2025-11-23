@@ -1,0 +1,71 @@
+stages:
+  - build
+  - test
+  - security
+  - deploy
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+
+build:docker:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA .
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+test:unit:
+  stage: test
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  script:
+    - npm test
+
+test:integration:
+  stage: test
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker-compose up -d
+    - sleep 10
+    - docker-compose exec -T app npm run test:integration
+    - docker-compose down
+
+security:scan:
+  stage: security
+  image: aquasec/trivy:latest
+  script:
+    - trivy image --exit-code 0 --severity HIGH,CRITICAL $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+deploy:staging:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - apk add --no-cache curl
+    - curl -X POST $DEPLOY_WEBHOOK_STAGING
+  environment:
+    name: staging
+    url: https://staging.example.com
+  only:
+    - develop
+
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  script:
+    - apk add --no-cache curl
+    - curl -X POST $DEPLOY_WEBHOOK_PRODUCTION
+  environment:
+    name: production
+    url: https://example.com
+  only:
+    - main
+  when: manual
+

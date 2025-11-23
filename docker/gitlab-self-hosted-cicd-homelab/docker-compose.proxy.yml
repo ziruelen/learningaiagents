@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    hostname: 'gitlab.local'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://gitlab.local'
+        nginx['listen_port'] = 80
+        # Deshabilitar Nginx interno (usar reverse proxy externo)
+        nginx['enable'] = false
+        # Configuración para reverse proxy (ajustar según tu red Docker)
+        gitlab_rails['trusted_proxies'] = ['172.18.0.0/16', '172.17.0.0/16']
+        # Optimizaciones
+        puma['worker_processes'] = 2
+        sidekiq['max_concurrency'] = 10
+        # Backup automático
+        gitlab_rails['backup_keep_time'] = 604800
+    expose:
+      - "80"
+    volumes:
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
+    networks:
+      - proxy_network
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+        reservations:
+          memory: 4G
+
+volumes:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:
+
+networks:
+  proxy_network:
+    external: true
+    name: nginx-proxy-manager_default  # Ajustar según tu setup
+
