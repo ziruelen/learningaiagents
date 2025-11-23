@@ -1,0 +1,7 @@
+# En docker-compose.yml, agregar límites
+deploy:
+  resources:
+    limits:
+      memory: 8G
+    reservations:
+      memory: 4G

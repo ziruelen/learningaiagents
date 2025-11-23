@@ -1,0 +1,13 @@
+server {
+    server_name app1.tudominio.com;
+    location / {
+        proxy_pass http://app1:80;
+    }
+}
+
+server {
+    server_name app2.tudominio.com;
+    location / {
+        proxy_pass http://app2:80;
+    }
+}

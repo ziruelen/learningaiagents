@@ -1,0 +1,10 @@
+{
+  "object_kind": "pipeline",
+  "object_attributes": {
+    "status": "success",
+    "ref": "main"
+  },
+  "project": {
+    "name": "mi-app"
+  }
+}

@@ -1,0 +1,14 @@
+concurrent = 4
+check_interval = 0
+
+[[runners]]
+  name = "docker-runner"
+  url = "http://gitlab.example.com"
+  token = "your-token"
+  executor = "docker"
+  [runners.docker]
+    tls_verify = false
+    image = "alpine:latest"
+    privileged = false
+    volumes = ["/cache", "/var/run/docker.sock:/var/run/docker.sock"]
+    network_mode = "gitlab_gitlab_network"
