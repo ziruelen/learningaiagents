@@ -23,4 +23,3 @@ Cada carpeta contiene ejemplos listos para copiar y pegar. Ver README.md en cada
 ## Artículo Completo
 
 Guía completa: [Kubernetes Básico para Homelab: Guía desde Cero 2025](https://www.eldiarioia.es/2025/11/23/kubernetes-basico-homelab-guia-desde-cero/)
-
