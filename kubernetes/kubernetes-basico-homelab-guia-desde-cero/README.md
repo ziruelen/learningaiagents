@@ -2,7 +2,7 @@
 
 ## Descripción
 
-Ejemplos de código y configuraciones del artículo **"Kubernetes Básico para Homelab: Guía desde Cero 2025"** publicado en [ElDiarioIA.es](https://www.eldiarioia.es/?p=2562).
+Ejemplos de código y configuraciones del artículo **"Kubernetes Básico para Homelab: Guía desde Cero 2025"** publicado en [ElDiarioIA.es](https://www.eldiarioia.es/?p=2570).
 
 ## Archivos Incluidos
 
@@ -147,7 +147,7 @@ docker-compose up -d
 ## Artículo Completo
 
 Lee el tutorial completo con explicaciones detalladas en:
-🔗 [Kubernetes Básico para Homelab: Guía desde Cero 2025](https://www.eldiarioia.es/?p=2562)
+🔗 [Kubernetes Básico para Homelab: Guía desde Cero 2025](https://www.eldiarioia.es/?p=2570)
 
 ## Soporte
 
