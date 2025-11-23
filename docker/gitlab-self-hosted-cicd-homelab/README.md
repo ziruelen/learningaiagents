@@ -5,7 +5,7 @@ Este repositorio contiene ejemplos y configuraciones para instalar y configurar 
 ## 📁 Estructura
 
 ```
-gitlab/
+docker/gitlab-self-hosted-cicd-homelab/
 ├── README.md                    # Este archivo
 ├── docker-compose.yml           # Configuración básica GitLab
 ├── docker-compose.proxy.yml     # GitLab con reverse proxy externo
@@ -27,7 +27,7 @@ gitlab/
 
 ```bash
 # Clonar o descargar este repositorio
-cd gitlab
+cd docker/gitlab-self-hosted-cicd-homelab
 
 # Editar docker-compose.yml y cambiar:
 # - hostname: 'gitlab.example.com'
