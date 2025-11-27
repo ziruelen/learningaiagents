@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    volumes:
+      - ./cloudflared-config:/etc/cloudflared
+    networks:
+      - homelab
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Ejemplo: Servicio protegido con Access
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    environment:
+      - N8N_HOST=n8n.tudominio.com
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://n8n.tudominio.com/
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - homelab
+    depends_on:
+      - cloudflared
+
+  # Ejemplo: Servicio público (sin Access)
+  # web:
+  #   image: nginx:alpine
+  #   container_name: web
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./web:/usr/share/nginx/html
+  #   networks:
+  #     - homelab
+
+networks:
+  homelab:
+    external: true
+    # Si no existe, crear con: docker network create homelab
+
+volumes:
+  n8n_data:
+    driver: local
+

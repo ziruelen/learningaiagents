@@ -1,0 +1,77 @@
+{
+  "description": "Plantilla de registros DNS para homelab con Cloudflare",
+  "records": [
+    {
+      "name": "@",
+      "type": "A",
+      "content": "192.0.2.1",
+      "ttl": 3600,
+      "proxied": true,
+      "comment": "Root domain - reemplazar con IP real"
+    },
+    {
+      "name": "www",
+      "type": "CNAME",
+      "content": "tudominio.com",
+      "ttl": 3600,
+      "proxied": true,
+      "comment": "WWW subdomain"
+    },
+    {
+      "name": "n8n",
+      "type": "AAAA",
+      "content": "100::",
+      "ttl": 3600,
+      "proxied": true,
+      "comment": "n8n automation - reemplazar con IPv6 real"
+    },
+    {
+      "name": "jellyfin",
+      "type": "AAAA",
+      "content": "100::",
+      "ttl": 3600,
+      "proxied": true,
+      "comment": "Jellyfin media server - reemplazar con IPv6 real"
+    },
+    {
+      "name": "homeassistant",
+      "type": "AAAA",
+      "content": "100::",
+      "ttl": 3600,
+      "proxied": true,
+      "comment": "Home Assistant - reemplazar con IPv6 real"
+    },
+    {
+      "name": "@",
+      "type": "MX",
+      "content": "route1.mx.cloudflare.net",
+      "priority": 10,
+      "ttl": 3600,
+      "comment": "Cloudflare Email Routing"
+    },
+    {
+      "name": "@",
+      "type": "MX",
+      "content": "route2.mx.cloudflare.net",
+      "priority": 20,
+      "ttl": 3600,
+      "comment": "Cloudflare Email Routing"
+    },
+    {
+      "name": "@",
+      "type": "TXT",
+      "content": "v=spf1 include:_spf.mx.cloudflare.net ~all",
+      "ttl": 3600,
+      "comment": "SPF record for email"
+    }
+  ],
+  "notes": [
+    "Reemplazar 'tudominio.com' con tu dominio real",
+    "Reemplazar IPs placeholder (192.0.2.1, 100::) con IPs reales",
+    "Ajustar TTL según necesidades (3600 = 1 hora, 300 = 5 minutos)",
+    "proxied: true activa CDN y protección DDoS de Cloudflare",
+    "Para servicios detrás de Tunnel, usar proxied: true",
+    "Para servicios directos, usar proxied: false"
+  ]
+}
+

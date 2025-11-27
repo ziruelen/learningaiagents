@@ -1,0 +1,52 @@
+# Cloudflare Access Policy - Ejemplo para Homelab
+# Usar con Cloudflare Zero Trust Dashboard o API
+
+name: "Homelab Access Policy"
+decision: "allow"
+
+# Usuarios/dominios permitidos
+include:
+  # Email específico
+  - email:
+      email: "admin@tudominio.com"
+  
+  # Dominio completo
+  - email_domain:
+      domain: "tudominio.com"
+  
+  # Grupo (si usas Google Workspace, Okta, etc.)
+  # - group:
+  #     email: "admins@tudominio.com"
+
+# Excepciones (bloquear)
+exclude:
+  # Bloquear por país
+  - country: "CN"
+  - country: "RU"
+  
+  # Bloquear IPs específicas
+  # - ip:
+  #     ip: "192.0.2.100/32"
+
+# Requisitos adicionales (AND)
+require:
+  # Requerir email específico
+  - email:
+      email: "admin@tudominio.com"
+  
+  # Requerir MFA
+  # - mfa: {}
+  
+  # Requerir dispositivo gestionado
+  # - device_posture:
+  #     check:
+  #       exists: true
+  #       operator: "in"
+  #       value: ["managed"]
+
+# Notas:
+# - Las políticas se evalúan en orden
+# - Si un usuario cumple "include" pero está en "exclude", se bloquea
+# - Todos los "require" deben cumplirse (AND)
+# - Para OR, crear múltiples políticas
+
