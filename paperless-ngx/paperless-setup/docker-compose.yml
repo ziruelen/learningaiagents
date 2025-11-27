@@ -1,0 +1,158 @@
+# Paperless-ngx Docker Compose - Stack Completo
+# Autor: ElDiarioIA.es
+# Guía: https://www.eldiarioia.es/paperless-ngx-digitaliza-documentos-ia-homelab/
+
+version: "3.8"
+
+services:
+  # ===========================================
+  # BROKER - Redis para cola de tareas
+  # ===========================================
+  broker:
+    image: redis:7-alpine
+    container_name: paperless-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # BASE DE DATOS - PostgreSQL
+  # ===========================================
+  db:
+    image: postgres:15-alpine
+    container_name: paperless-db
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${PAPERLESS_DBNAME:-paperless}
+      POSTGRES_USER: ${PAPERLESS_DBUSER:-paperless}
+      POSTGRES_PASSWORD: ${PAPERLESS_DBPASS:-paperless}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PAPERLESS_DBUSER:-paperless}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # PAPERLESS-NGX - Aplicación Principal
+  # ===========================================
+  webserver:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    container_name: paperless
+    restart: unless-stopped
+    depends_on:
+      broker:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      # Datos persistentes
+      - data:/usr/src/paperless/data
+      - media:/usr/src/paperless/media
+      # Carpeta de consumo (donde dejas documentos para procesar)
+      - ./consume:/usr/src/paperless/consume
+      # Carpeta de exportación
+      - ./export:/usr/src/paperless/export
+    environment:
+      # --- Base de datos ---
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBNAME: ${PAPERLESS_DBNAME:-paperless}
+      PAPERLESS_DBUSER: ${PAPERLESS_DBUSER:-paperless}
+      PAPERLESS_DBPASS: ${PAPERLESS_DBPASS:-paperless}
+      
+      # --- Redis ---
+      PAPERLESS_REDIS: redis://broker:6379
+      
+      # --- Zona horaria ---
+      PAPERLESS_TIME_ZONE: ${TZ:-Europe/Madrid}
+      
+      # --- OCR ---
+      PAPERLESS_OCR_LANGUAGE: ${PAPERLESS_OCR_LANGUAGE:-spa+eng}
+      PAPERLESS_OCR_MODE: skip_noarchive
+      
+      # --- Consumer ---
+      PAPERLESS_CONSUMER_POLLING: 30
+      PAPERLESS_CONSUMER_RECURSIVE: "true"
+      PAPERLESS_CONSUMER_ENABLE_BARCODES: "true"
+      
+      # --- Admin inicial ---
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:-changeme}
+      
+      # --- Permisos ---
+      USERMAP_UID: ${PUID:-1000}
+      USERMAP_GID: ${PGID:-1000}
+      
+      # --- URL externa (para notificaciones y links) ---
+      PAPERLESS_URL: ${PAPERLESS_URL:-http://localhost:8000}
+      
+      # --- Tika/Gotenberg (opcional, para Office docs) ---
+      PAPERLESS_TIKA_ENABLED: ${PAPERLESS_TIKA_ENABLED:-false}
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ===========================================
+  # TIKA - Extracción de texto (opcional)
+  # ===========================================
+  tika:
+    image: apache/tika:latest
+    container_name: paperless-tika
+    restart: unless-stopped
+    profiles:
+      - office  # Solo se activa con: docker compose --profile office up
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9998"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ===========================================
+  # GOTENBERG - Conversión de documentos (opcional)
+  # ===========================================
+  gotenberg:
+    image: gotenberg/gotenberg:7
+    container_name: paperless-gotenberg
+    restart: unless-stopped
+    profiles:
+      - office  # Solo se activa con: docker compose --profile office up
+    command:
+      - "gotenberg"
+      - "--chromium-disable-javascript=true"
+      - "--chromium-allow-list=file:///tmp/.*"
+
+volumes:
+  redis_data:
+  pgdata:
+  data:
+  media:
+
+# ===========================================
+# NOTAS DE USO
+# ===========================================
+# 1. Copia .env.example a .env y ajusta valores
+# 2. Inicia: docker compose up -d
+# 3. Accede: http://localhost:8000
+# 4. Usuario: admin / Password: el que pongas en .env
+#
+# Para documentos Office (DOCX, XLSX, PPTX):
+#   docker compose --profile office up -d
+#
+# Backup:
+#   ./scripts/backup.sh
+#
+# Restaurar:
+#   ./scripts/restore.sh backup_FECHA.tar.gz
+
