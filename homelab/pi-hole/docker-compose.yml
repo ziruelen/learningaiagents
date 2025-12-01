@@ -1,0 +1,54 @@
+# Pi-hole Docker Compose - Configuración Básica
+# Guía completa: https://www.eldiarioia.es/pi-hole-bloqueador-dns-homelab
+# Repo: https://github.com/ziruelen/learningaiagents/tree/main/homelab/pi-hole
+
+version: "3"
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      # DNS
+      - "53:53/tcp"
+      - "53:53/udp"
+      # Web interface
+      - "80:80/tcp"
+      # HTTPS (opcional)
+      # - "443:443/tcp"
+    environment:
+      # Zona horaria
+      TZ: 'Europe/Madrid'
+      # Password para el panel de administración
+      # Cámbiala por una segura
+      WEBPASSWORD: 'cambiame_por_password_seguro'
+      # Upstream DNS servers (por defecto Cloudflare + Google)
+      PIHOLE_DNS_: '1.1.1.1;8.8.8.8'
+      # Habilitar DNSSEC
+      DNSSEC: 'true'
+      # Logging de consultas
+      QUERY_LOGGING: 'true'
+      # Tema oscuro
+      WEBTHEME: 'default-dark'
+    volumes:
+      # Persistencia de configuración
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    # Necesario para modificar configuración de red
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "dig", "+short", "+norecurse", "+retry=0", "@127.0.0.1", "pi.hole"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# Uso:
+# 1. Crea el directorio: mkdir -p etc-pihole etc-dnsmasq.d
+# 2. Inicia: docker compose up -d
+# 3. Accede: http://TU_IP/admin
+# 4. Configura tu router para usar esta IP como DNS
+
+

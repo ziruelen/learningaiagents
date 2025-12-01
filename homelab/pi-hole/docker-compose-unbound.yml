@@ -1,0 +1,75 @@
+# Pi-hole + Unbound Docker Compose - DNS Recursivo Privado
+# Guía completa: https://www.eldiarioia.es/pi-hole-bloqueador-dns-homelab
+# Repo: https://github.com/ziruelen/learningaiagents/tree/main/homelab/pi-hole
+
+version: "3"
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+    environment:
+      TZ: 'Europe/Madrid'
+      WEBPASSWORD: 'cambiame_por_password_seguro'
+      # Apunta a Unbound como upstream DNS
+      PIHOLE_DNS_: '172.20.0.2#5335'
+      # Unbound maneja DNSSEC, desactívalo aquí
+      DNSSEC: 'false'
+      QUERY_LOGGING: 'true'
+      WEBTHEME: 'default-dark'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    networks:
+      pihole_net:
+        ipv4_address: 172.20.0.3
+    depends_on:
+      - unbound
+    healthcheck:
+      test: ["CMD", "dig", "+short", "+norecurse", "+retry=0", "@127.0.0.1", "pi.hole"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:latest
+    ports:
+      # Puerto interno para Pi-hole
+      - "5335:5335/tcp"
+      - "5335:5335/udp"
+    volumes:
+      # Configuración personalizada de Unbound
+      - './unbound:/opt/unbound/etc/unbound'
+    restart: unless-stopped
+    networks:
+      pihole_net:
+        ipv4_address: 172.20.0.2
+    healthcheck:
+      test: ["CMD", "drill", "@127.0.0.1", "-p", "5335", "cloudflare.com"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  pihole_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+# Uso:
+# 1. Crea directorios: mkdir -p etc-pihole etc-dnsmasq.d unbound
+# 2. Copia unbound.conf a ./unbound/unbound.conf
+# 3. Descarga root.hints: wget https://www.internic.net/domain/named.root -O unbound/root.hints
+# 4. Inicia: docker compose -f docker-compose-unbound.yml up -d
+# 5. Accede: http://TU_IP/admin
+
+
