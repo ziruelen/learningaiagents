@@ -1,0 +1,49 @@
+version: "3"
+
+# Pi-hole + Unbound para DNS recursivo privado
+# Máxima privacidad: tus queries DNS nunca pasan por terceros
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+    environment:
+      TZ: 'Europe/Madrid'
+      WEBPASSWORD: 'tu_password_seguro'
+      PIHOLE_DNS_: '172.20.0.2#5335'  # Apunta a Unbound
+      DNSSEC: 'true'
+      QUERY_LOGGING: 'true'
+      WEBTHEME: 'default-dark'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+    depends_on:
+      - unbound
+    networks:
+      pihole_network:
+        ipv4_address: 172.20.0.3
+
+  unbound:
+    container_name: unbound
+    image: mvance/unbound:latest
+    volumes:
+      - './unbound:/opt/unbound/etc/unbound'
+    restart: unless-stopped
+    networks:
+      pihole_network:
+        ipv4_address: 172.20.0.2
+
+networks:
+  pihole_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+

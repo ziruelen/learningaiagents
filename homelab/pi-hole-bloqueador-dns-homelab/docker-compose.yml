@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "80:80/tcp"
+    environment:
+      TZ: 'Europe/Madrid'
+      WEBPASSWORD: 'tu_password_seguro'
+      PIHOLE_DNS_: '1.1.1.1;8.8.8.8'
+      DNSSEC: 'true'
+      QUERY_LOGGING: 'true'
+      WEBTHEME: 'default-dark'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+
