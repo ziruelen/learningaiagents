@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    volumes:
+      - ./vw-data:/data
+    environment:
+      - DOMAIN=https://vault.tudominio.com
+      - SIGNUPS_ALLOWED=false
+      - WEBSOCKET_ENABLED=true
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+    labels:
+      # Habilitar Traefik
+      - "traefik.enable=true"
+      
+      # Router principal (UI Web)
+      - "traefik.http.routers.vaultwarden-ui.rule=Host(`vault.tudominio.com`)"
+      - "traefik.http.routers.vaultwarden-ui.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden-ui.tls=true"
+      - "traefik.http.routers.vaultwarden-ui.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.vaultwarden-ui.service=vaultwarden-ui"
+      - "traefik.http.services.vaultwarden-ui.loadbalancer.server.port=80"
+      
+      # Router WebSocket (notificaciones)
+      - "traefik.http.routers.vaultwarden-ws.rule=Host(`vault.tudominio.com`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.vaultwarden-ws.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden-ws.tls=true"
+      - "traefik.http.routers.vaultwarden-ws.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.vaultwarden-ws.service=vaultwarden-ws"
+      - "traefik.http.services.vaultwarden-ws.loadbalancer.server.port=3012"
+    networks:
+      - traefik-network
+
+networks:
+  traefik-network:
+    external: true
+

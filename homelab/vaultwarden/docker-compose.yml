@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    volumes:
+      - ./vw-data:/data
+    environment:
+      # Dominio (OBLIGATORIO para HTTPS)
+      - DOMAIN=https://vault.tudominio.com
+      
+      # Seguridad
+      - SIGNUPS_ALLOWED=false
+      - INVITATIONS_ALLOWED=true
+      - SHOW_PASSWORD_HINT=false
+      
+      # WebSocket (notificaciones en tiempo real)
+      - WEBSOCKET_ENABLED=true
+      
+      # Admin panel (genera token con: openssl rand -base64 48)
+      - ADMIN_TOKEN=${ADMIN_TOKEN:-}
+      
+      # SMTP (opcional - para emails)
+      # - SMTP_HOST=smtp.gmail.com
+      # - SMTP_PORT=587
+      # - SMTP_SECURITY=starttls
+      # - SMTP_USERNAME=tu@email.com
+      # - SMTP_PASSWORD=app_password
+      # - SMTP_FROM=tu@email.com
+    ports:
+      - "8080:80"
+      - "3012:3012"
+
