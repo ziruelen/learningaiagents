@@ -1,0 +1,37 @@
+[server]
+DOMAIN = git.tudominio.com
+SSH_DOMAIN = git.tudominio.com
+HTTP_PORT = 3000
+ROOT_URL = https://git.tudominio.com
+DISABLE_SSH = false
+SSH_PORT = 22
+OFFLINE_MODE = false
+
+[database]
+DB_TYPE = postgres
+HOST = postgres:5432
+NAME = gitea
+USER = gitea
+PASSWD = tu_password_aqui
+
+[repository]
+ROOT = /data/git/repositories
+SCRIPT_TYPE = bash
+
+[security]
+INSTALL_LOCK = true
+SECRET_KEY = tu_secret_key_generado
+INTERNAL_TOKEN = tu_internal_token_generado
+
+[service]
+ENABLE_REVERSE_PROXY_AUTHENTICATION = false
+ENABLE_REVERSE_PROXY_AUTO_REGISTRATION = false
+ENABLE_CAPTCHA = false
+
+[mailer]
+ENABLED = false
+
+[queue]
+TYPE = channel
+LENGTH = 100
+
