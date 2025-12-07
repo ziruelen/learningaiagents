@@ -1,0 +1,71 @@
+{
+  "name": "Generar Video UGC Automático",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const prompts = [\n  \"a person unboxing a product, authentic UGC style, smartphone video, natural lighting, vertical format\",\n  \"a person reviewing a product, showing features, tutorial style, clear demonstration, natural lighting, vertical format\",\n  \"a person using a product in daily life, casual setting, authentic moment, natural lighting, lifestyle content, vertical format\"\n];\n\nreturn prompts.map((prompt, index) => ({\n  prompt: prompt,\n  seed: Math.floor(Math.random() * 1000000),\n  index: index\n}));"
+      },
+      "name": "Generate Prompts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://comfyui:8188/prompt",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Generate Images",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "command": "docker exec ffmpeg ffmpeg -framerate 1/3 -pattern_type glob -i '/data/images/ugc_video_*.png' -vf 'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2' -c:v libx264 -pix_fmt yuv420p -r 30 /data/videos/ugc_$(date +%s).mp4"
+      },
+      "name": "Create Video",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{"node": "Generate Prompts", "type": "main", "index": 0}]]
+    },
+    "Generate Prompts": {
+      "main": [[{"node": "Generate Images", "type": "main", "index": 0}]]
+    },
+    "Generate Images": {
+      "main": [[{"node": "Create Video", "type": "main", "index": 0}]]
+    }
+  }
+}
+

@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Stable Diffusion (ComfyUI)
+  comfyui:
+    image: yanwk/comfyui-boot:cu126
+    container_name: comfyui
+    ports:
+      - "8188:8188"
+    volumes:
+      - ./comfyui_models:/comfyui/models
+      - ./comfyui_output:/comfyui/output
+    environment:
+      - CLI_ARGS=--listen 0.0.0.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # n8n
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n_workflows:/data/workflows
+      - ./video_output:/data/videos
+      - ./comfyui_output:/data/images
+    environment:
+      - N8N_HOST=0.0.0.0
+      - WEBHOOK_URL=http://localhost:5678/
+    depends_on:
+      - comfyui
+    restart: unless-stopped
+
+  # FFmpeg (para procesamiento de video)
+  ffmpeg:
+    image: jrottenberg/ffmpeg:latest
+    container_name: ffmpeg
+    volumes:
+      - ./video_output:/data/videos
+      - ./comfyui_output:/data/images
+    command: tail -f /dev/null  # Mantener contenedor corriendo
+    restart: unless-stopped
+
+volumes:
+  n8n_data:
+
