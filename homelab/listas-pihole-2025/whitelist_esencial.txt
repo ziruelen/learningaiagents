@@ -1,0 +1,51 @@
+# Whitelist Esencial para Pi-hole
+# Dominios que NO deben bloquearse para mantener funcionalidad básica
+
+# Google Services
+google.com
+gmail.com
+googleapis.com
+googleusercontent.com
+gstatic.com
+google-analytics.com
+googleadservices.com
+
+# Microsoft Services
+microsoft.com
+office.com
+live.com
+outlook.com
+microsoftonline.com
+office365.com
+onedrive.com
+
+# CDNs Esenciales
+cloudflare.com
+cloudfront.net
+fastly.com
+jsdelivr.net
+cdnjs.com
+
+# Actualizaciones del Sistema
+windowsupdate.com
+update.microsoft.com
+download.microsoft.com
+windows.com
+
+# Servicios de Pago
+paypal.com
+stripe.com
+visa.com
+mastercard.com
+amazonpay.com
+
+# Servicios de Streaming (si los usas)
+netflix.com
+youtube.com
+spotify.com
+
+# DNS Públicos (si los usas como fallback)
+1.1.1.1
+8.8.8.8
+9.9.9.9
+
