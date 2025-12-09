@@ -1,0 +1,26 @@
+version: '3.8'
+
+# Extensión del docker-compose.yml básico para añadir Collabora Online
+# Uso: docker compose -f docker-compose.yml -f docker-compose.collabora.yml up -d
+
+services:
+  collabora:
+    image: collabora/code:latest
+    container_name: nextcloud-collabora
+    restart: unless-stopped
+    environment:
+      - domain=${NEXTCLOUD_DOMAIN}
+      - username=admin
+      - password=${COLLABORA_PASSWORD}
+      - extra_params=--o:ssl.enable=false --o:ssl.termination=true
+    networks:
+      - nextcloud
+    ports:
+      - "9980:9980"
+    cap_add:
+      - MKNOD
+
+networks:
+  nextcloud:
+    external: true
+

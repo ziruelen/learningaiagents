@@ -1,0 +1,28 @@
+version: '3.8'
+
+# Extensión del docker-compose.yml básico para añadir OnlyOffice
+# Uso: docker compose -f docker-compose.yml -f docker-compose.onlyoffice.yml up -d
+
+services:
+  onlyoffice:
+    image: onlyoffice/documentserver:latest
+    container_name: nextcloud-onlyoffice
+    restart: unless-stopped
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=${ONLYOFFICE_JWT_SECRET}
+      - JWT_HEADER=Authorization
+    volumes:
+      - onlyoffice_data:/var/www/onlyoffice/Data
+    networks:
+      - nextcloud
+    ports:
+      - "9980:80"
+
+volumes:
+  onlyoffice_data:
+
+networks:
+  nextcloud:
+    external: true
+
