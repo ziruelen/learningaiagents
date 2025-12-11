@@ -1,0 +1,36 @@
+# Ejemplo de configuración de Plex en Unraid
+# Nota: En Unraid, los contenedores se configuran desde la UI
+# Este archivo es solo de referencia para entender la configuración
+
+version: '3.8'
+
+services:
+  plex:
+    image: linuxserver/plex:latest
+    container_name: plex
+    network_mode: bridge
+    environment:
+      - PUID=99
+      - PGID=100
+      - TZ=Europe/Madrid
+      - VERSION=docker
+    volumes:
+      - /mnt/user/appdata/plex:/config
+      - /mnt/user/media:/media
+    ports:
+      - "32400:32400"      # Web UI
+      - "32400:32400/udp"  # Discovery
+      - "32469:32469"      # DLNA
+    restart: unless-stopped
+
+# Instalación en Unraid:
+# 1. Ir a Apps (Community Applications)
+# 2. Buscar "Plex"
+# 3. Click Install
+# 4. Configurar paths y variables de entorno
+# 5. Click Apply
+
+# Paths típicos en Unraid:
+# - /mnt/user/appdata/plex → Configuración de Plex
+# - /mnt/user/media → Contenido multimedia
+# - /mnt/user/appdata/plex/transcode → Transcoding (opcional, en cache)
