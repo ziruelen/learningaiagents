@@ -1,0 +1,29 @@
+# Reglas de Filtrado Personalizadas para AdGuard Home
+# Añadir estas reglas en Filters → Custom filtering rules
+
+# Bloquear dominio específico
+||ads.example.com^
+
+# Desbloquear dominio (whitelist)
+@@||example.com^
+
+# Bloquear para cliente específico (IP: 192.168.1.100)
+||social-media.com^$client=192.168.1.100
+
+# Bloquear para todos excepto un cliente (IP: 192.168.1.50)
+||ads.com^$client=~192.168.1.50
+
+# Bloquear por tipo de contenido
+||example.com^$content
+||example.com^$script
+||example.com^$image
+
+# Redirigir dominio a IP local
+||homelab.local^$dnsrewrite=192.168.1.10
+||nas.local^$dnsrewrite=192.168.1.20
+
+# Bloquear por regex
+/ads.*\.example\.com$/
+
+# Bloquear subdominios
+||*.ads.example.com^

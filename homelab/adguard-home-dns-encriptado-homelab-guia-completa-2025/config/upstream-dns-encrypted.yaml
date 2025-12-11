@@ -1,0 +1,28 @@
+# Configuración de Upstream DNS Encriptado para AdGuardHome.yaml
+# Añadir esta sección en dns: upstream_dns:
+
+dns:
+  upstream_dns:
+    # DNS-over-HTTPS (DoH)
+    - https://dns.cloudflare.com/dns-query
+    - https://dns.google/dns-query
+    - https://dns.quad9.net/dns-query
+    
+    # DNS-over-TLS (DoT)
+    - tls://one.one.one.one
+    - tls://dns.google
+    - tls://dns.quad9.net
+    
+    # DNS-over-QUIC (DoQ)
+    - quic://dns.adguard-dns.com
+    
+  bootstrap_dns:
+    - 1.1.1.1
+    - 8.8.8.8
+    
+  fallback_dns:
+    - https://dns.cloudflare.com/dns-query
+    - tls://one.one.one.one
+    
+  all_servers: true  # Usar todos los upstreams en paralelo
+  fastest_addr: true  # Usar la IP más rápida

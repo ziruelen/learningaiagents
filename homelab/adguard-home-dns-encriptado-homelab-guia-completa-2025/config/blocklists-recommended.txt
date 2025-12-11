@@ -1,0 +1,32 @@
+# Blocklists Recomendadas para AdGuard Home
+# Añadir estas URLs en Filters → DNS blocklists
+
+# AdGuard DNS Filter (bloqueo de anuncios básico)
+https://adguardteam.github.io/HostlistsForAdGuard/adguard-dns.txt
+
+# OISD (Optimized Internet Security Database)
+https://dbl.oisd.nl/
+
+# HaGeZi's Multi PRO (protección completa)
+https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt
+
+# AdAway Default Blocklist (móviles)
+https://raw.githubusercontent.com/AdAway/adaway.github.io/master/hosts.txt
+
+# Steven Black's Unified Hosts
+https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
+
+# Malware Domain List
+https://mirror1.malwaredomains.com/files/justdomains
+
+# Phishing Army
+https://phishing.army/download/phishing_army_blocklist_extended.txt
+
+# EasyList (anuncios web)
+https://easylist.to/easylist/easylist.txt
+
+# EasyPrivacy (trackers)
+https://easylist.to/easylist/easyprivacy.txt
+
+# Fanboy's Annoyance List (popups, banners)
+https://easylist.to/easylist/fanboy-annoyance.txt

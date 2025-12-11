@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard-home
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"      # DNS TCP
+      - "53:53/udp"      # DNS UDP
+      - "80:80/tcp"      # Web UI HTTP
+      - "443:443/tcp"    # Web UI HTTPS / DoH
+      - "443:443/udp"    # DoH UDP
+      - "853:853/tcp"    # DoT
+      - "784:784/udp"    # DoQ
+      - "3000:3000/tcp"  # Setup inicial (remover después de configurar)
+    volumes:
+      - ./work:/opt/adguardhome/work
+      - ./conf:/opt/adguardhome/conf
+    environment:
+      TZ: Europe/Madrid
+    networks:
+      - homelab
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  homelab:
+    external: true
