@@ -1,0 +1,46 @@
+# Ejemplo de configuración SSH (~/.ssh/config)
+# Copia este archivo a ~/.ssh/config y personaliza según tus necesidades
+
+# Servidor básico
+Host servidor1
+    HostName 192.168.1.10
+    User admin
+    Port 22
+    IdentityFile ~/.ssh/id_ed25519
+
+# Servidor con puerto personalizado
+Host servidor2
+    HostName servidor.ejemplo.com
+    User usuario
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519
+
+# Múltiples servidores con mismo dominio
+Host servidor3 servidor4
+    HostName %h.ejemplo.com
+    User admin
+    IdentityFile ~/.ssh/id_ed25519
+
+# Configuración con wildcards
+Host *.ejemplo.com
+    User admin
+    IdentityFile ~/.ssh/id_ed25519_ejemplo
+    Compression yes
+
+# Servidor de producción (configuración avanzada)
+Host produccion
+    HostName prod.ejemplo.com
+    User deploy
+    Port 2222
+    IdentityFile ~/.ssh/id_ed25519_prod
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    Compression yes
+    ForwardAgent yes
+
+# Configuración para GitHub
+Host github.com
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_github
+    AddKeysToAgent yes
