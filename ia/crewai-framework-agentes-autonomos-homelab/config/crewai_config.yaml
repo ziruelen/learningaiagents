@@ -1,0 +1,23 @@
+# Configuración de CrewAI
+crew:
+  verbose: 2
+  process: sequential  # sequential, hierarchical, consensual
+  
+agents:
+  default_llm: "ollama"
+  ollama_base_url: "http://localhost:11434"
+  ollama_model: "llama3.1"
+  
+  researcher:
+    role: "Investigador"
+    goal: "Investigar información relevante"
+    backstory: "Experto investigador"
+    
+  writer:
+    role: "Escritor"
+    goal: "Escribir contenido de calidad"
+    backstory: "Escritor técnico profesional"
+
+tasks:
+  max_iterations: 5
+  timeout: 300  # segundos
