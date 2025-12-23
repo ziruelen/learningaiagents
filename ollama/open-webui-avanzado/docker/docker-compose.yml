@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    ports:
+      - "3000:8080"
+    environment:
+      # Conexión a Ollama
+      - OLLAMA_BASE_URL=http://ollama:11434
+      
+      # Configuración de RAG
+      - ENABLE_RAG_HYBRID_SEARCH=true
+      - ENABLE_RAG_WEB_LOADER_SSL_VERIFICATION=true
+      - ENABLE_RAG_LOCAL_WEB_FETCH=true
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_EMBEDDING_MODEL=nomic-embed-text
+      - RAG_EMBEDDING_ENGINE_ENDPOINT=http://ollama:11434
+      - RAG_TEMPLATE=llama3
+      - RAG_TOP_K=4
+      - RAG_RELEVANCE_THRESHOLD=0.0
+      - RAG_EMBEDDING_STORE_PATH=/app/backend/data/vectorstore
+      
+      # Configuración de memoria
+      - ENABLE_MEMORY_MANAGEMENT=true
+      - MEMORY_STORE_PATH=/app/backend/data/memory
+      
+      # Seguridad
+      - WEBUI_SECRET_KEY=change-this-secret-key-in-production
+      - WEBUI_JWT_SECRET_KEY=change-this-jwt-secret-key-in-production
+      - ENABLE_SIGNUP=false
+      - DEFAULT_USER_ROLE=admin
+      
+      # Personalización
+      - WEBUI_NAME=Mi Open WebUI
+      - WEBUI_URL=http://localhost:3000
+      - WEBUI_AUTH=false
+      
+      # Límites
+      - MAX_CHAT_HISTORY_STORAGE=100
+      - MAX_PROMPT_LENGTH=4096
+      - MAX_CONTEXT_LENGTH=8192
+      
+      # Plugins
+      - ENABLE_PLUGINS=true
+      - PLUGINS_DIR=/app/backend/data/plugins
+      
+    volumes:
+      - open-webui-data:/app/backend/data
+      - ./plugins:/app/backend/data/plugins
+      - ./custom.css:/app/backend/data/custom.css
+    depends_on:
+      - ollama
+    networks:
+      - ollama-network
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - ollama-network
+    restart: unless-stopped
+
+volumes:
+  open-webui-data:
+  ollama-data:
+
+networks:
+  ollama-network:
+    driver: bridge
+

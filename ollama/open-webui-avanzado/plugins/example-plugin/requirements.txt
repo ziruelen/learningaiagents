@@ -1,0 +1,3 @@
+# Dependencias del plugin (si las hay)
+# openwebui>=1.0.0
+
