@@ -1,0 +1,38 @@
+# Configuración compartida para RAG (LangChain y LlamaIndex)
+
+# Qdrant Vector Store
+qdrant:
+  url: "http://localhost:6333"
+  grpc_port: 6334
+  collection_name: "rag_documents"
+  vector_size: 768  # nomic-embed-text dimension
+
+# Ollama LLM
+ollama:
+  url: "http://localhost:11434"
+  model: "llama3"
+  embedding_model: "nomic-embed-text"
+  timeout: 120
+
+# Document Processing
+documents:
+  chunk_size: 1000
+  chunk_overlap: 200
+  data_dir: "./data"
+  
+# Retrieval Settings
+retrieval:
+  top_k: 3  # Número de chunks a recuperar
+  similarity_threshold: 0.7  # Umbral mínimo de similitud
+
+# LangChain Specific
+langchain:
+  chain_type: "stuff"  # "stuff", "map_reduce", "refine"
+  memory_type: "buffer"  # "buffer", "summary", "window"
+
+# LlamaIndex Specific
+llamaindex:
+  index_type: "vector"  # "vector", "keyword", "tree"
+  persist_dir: "./storage"
+  enable_cache: true
+
