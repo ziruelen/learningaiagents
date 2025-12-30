@@ -1,0 +1,61 @@
+{
+  "version": "0.1.0",
+  "graph": {
+    "edges": [
+      {
+        "source": "start",
+        "target": "llm",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "source": "llm",
+        "target": "end",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "data": {
+          "title": "Inicio",
+          "type": "start"
+        }
+      },
+      {
+        "id": "llm",
+        "type": "llm",
+        "data": {
+          "title": "Chatbot LLM",
+          "model": "llama3.2:3b",
+          "provider": "ollama",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "system_prompt": "Eres un asistente útil y amigable. Responde de forma clara y concisa."
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "data": {
+          "title": "Fin",
+          "type": "end"
+        }
+      }
+    ]
+  },
+  "features": {
+    "file_upload": {
+      "enabled": false
+    },
+    "opening_statement": "¡Hola! Soy tu asistente de IA. ¿En qué puedo ayudarte?",
+    "suggested_questions": [
+      "¿Qué es Dify.AI?",
+      "¿Cómo funciona RAG?",
+      "¿Puedes ayudarme con mi proyecto?"
+    ]
+  }
+}
+

@@ -1,0 +1,73 @@
+{
+  "version": "0.1.0",
+  "graph": {
+    "edges": [
+      {
+        "source": "start",
+        "target": "knowledge_retrieval",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      },
+      {
+        "source": "knowledge_retrieval",
+        "target": "llm",
+        "sourceHandle": "output",
+        "targetHandle": "context"
+      },
+      {
+        "source": "llm",
+        "target": "end",
+        "sourceHandle": "output",
+        "targetHandle": "input"
+      }
+    ],
+    "nodes": [
+      {
+        "id": "start",
+        "type": "start",
+        "data": {
+          "title": "Inicio",
+          "type": "start"
+        }
+      },
+      {
+        "id": "knowledge_retrieval",
+        "type": "knowledge-retrieval",
+        "data": {
+          "title": "Búsqueda de Conocimiento",
+          "knowledge_base_id": "YOUR_KB_ID",
+          "retrieval_mode": "semantic_search",
+          "top_k": 5,
+          "score_threshold": 0.7
+        }
+      },
+      {
+        "id": "llm",
+        "type": "llm",
+        "data": {
+          "title": "LLM con Contexto",
+          "model": "llama3.2:3b",
+          "provider": "ollama",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "system_prompt": "Responde basándote únicamente en el contexto proporcionado. Si no tienes información suficiente, di que no lo sabes."
+        }
+      },
+      {
+        "id": "end",
+        "type": "end",
+        "data": {
+          "title": "Fin",
+          "type": "end"
+        }
+      }
+    ]
+  },
+  "features": {
+    "file_upload": {
+      "enabled": true,
+      "allowed_file_types": [".pdf", ".txt", ".md", ".docx"]
+    }
+  }
+}
+
