@@ -1,0 +1,32 @@
+{
+  "retention": {
+    "keepLatest": 10,
+    "keepHourly": 24,
+    "keepDaily": 7,
+    "keepWeekly": 4,
+    "keepMonthly": 12,
+    "keepAnnual": 5
+  },
+  "compression": {
+    "algorithm": "s2",
+    "level": 0
+  },
+  "scheduling": {
+    "manual": false,
+    "interval": "24h"
+  },
+  "files": {
+    "ignore": [
+      "*.tmp",
+      "*.log",
+      "node_modules/**",
+      ".git/**",
+      ".cache/**"
+    ]
+  },
+  "errorHandling": {
+    "ignoreFileErrors": false,
+    "ignoreDirectoryErrors": false
+  }
+}
+

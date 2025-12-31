@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  kopia-server:
+    image: kopia/kopia:latest
+    container_name: kopia-server
+    restart: unless-stopped
+    volumes:
+      - ./kopia-repo:/kopia-repo
+      - ./kopia-config:/app/config
+      - /data:/data:ro  # Volumen a hacer backup (solo lectura)
+    ports:
+      - "51515:51515"
+    environment:
+      - KOPIA_USERNAME=admin
+      - KOPIA_PASSWORD=${KOPIA_PASSWORD:-changeme}
+    command: server start --insecure --without-password --ui
+    healthcheck:
+      test: ["CMD", "kopia", "repository", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+

@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  restic-backup:
+    image: restic/restic:latest
+    container_name: restic-backup
+    volumes:
+      - /data:/data:ro
+      - ./restic-cache:/root/.cache/restic
+      - ./restic-config:/root/.config/restic
+    environment:
+      - RESTIC_PASSWORD=${RESTIC_PASSWORD}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - RESTIC_REPOSITORY=${RESTIC_REPOSITORY:-s3:s3.amazonaws.com/my-bucket/restic}
+    command: >
+      sh -c "
+        restic init || true &&
+        restic backup /data --tag=automated,daily &&
+        restic forget --keep-last 10 --keep-daily 7 --keep-weekly 4 --keep-monthly 12 --prune
+      "
+    restart: "no"  # Ejecutar manualmente o con cron
+

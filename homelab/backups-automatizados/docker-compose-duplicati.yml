@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    restart: unless-stopped
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Madrid
+    volumes:
+      - ./duplicati-config:/config
+      - /data:/data:ro  # Volumen a hacer backup (solo lectura)
+      - ./backups:/backups
+    ports:
+      - "8200:8200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8200/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
