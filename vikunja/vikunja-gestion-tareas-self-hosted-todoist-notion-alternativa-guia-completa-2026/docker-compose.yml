@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  vikunja-db:
+    image: postgres:13
+    container_name: vikunja-db
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_USER: vikunja
+      POSTGRES_DB: vikunja
+    volumes:
+      - vikunja-db:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - vikunja
+
+  vikunja-api:
+    image: vikunja/api:latest
+    container_name: vikunja-api
+    environment:
+      VIKUNJA_SERVICE_PUBLICPATH: ${VIKUNJA_URL:-http://localhost:3456}
+      DB_TYPE: postgres
+      DB_HOST: vikunja-db
+      DB_USER: vikunja
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_DATABASE: vikunja
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      CORS_ENABLED: "true"
+      LOG_LEVEL: info
+    ports:
+      - "3456:3456"
+    depends_on:
+      - vikunja-db
+    restart: unless-stopped
+    networks:
+      - vikunja
+
+  vikunja-proxy:
+    image: vikunja/proxy:latest
+    container_name: vikunja-proxy
+    ports:
+      - "80:80"
+    environment:
+      VIKUNJA_API_URL: http://vikunja-api:3456
+    depends_on:
+      - vikunja-api
+    restart: unless-stopped
+    networks:
+      - vikunja
+
+volumes:
+  vikunja-db:
+
+networks:
+  vikunja:
+    driver: bridge
