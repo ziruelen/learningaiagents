@@ -1,0 +1,54 @@
+# Configuración de External Libraries para Immich
+# Este archivo muestra cómo configurar múltiples external libraries
+
+# Ejemplo 1: Fotos antiguas en NAS
+external_library_1:
+  name: "Fotos Antiguas NAS"
+  path: "/mnt/nas/fotos_antiguas"
+  user: "admin"
+  scan_interval: "daily"  # daily, weekly, manual
+  exclusions:
+    - "*.raw"
+    - "*.cr2"
+    - "*.nef"
+    - "Thumbs.db"
+    - ".DS_Store"
+  read_only: true
+
+# Ejemplo 2: Videos antiguos
+external_library_2:
+  name: "Videos Antiguos"
+  path: "/mnt/nas/videos_antiguos"
+  user: "admin"
+  scan_interval: "weekly"
+  exclusions:
+    - "*.tmp"
+    - "*.cache"
+  read_only: true
+
+# Ejemplo 3: Migración desde Google Photos
+external_library_3:
+  name: "Google Photos Migrado"
+  path: "/mnt/storage/google_photos_migrated"
+  user: "admin"
+  scan_interval: "manual"  # Solo escanear una vez después de migración
+  exclusions: []
+  read_only: true
+
+# Ejemplo 4: Fotos profesionales (RAW)
+external_library_4:
+  name: "Fotos Profesionales RAW"
+  path: "/mnt/storage/fotos_profesionales"
+  user: "fotografo"
+  scan_interval: "daily"
+  exclusions:
+    - "*.jpg"  # Solo procesar RAW
+    - "*.jpeg"
+  read_only: true
+
+# Notas de configuración:
+# - read_only: true protege archivos originales (recomendado)
+# - scan_interval: "daily" escanea cada día, "weekly" cada semana, "manual" solo cuando se solicita
+# - exclusions: Lista de patrones a excluir del escaneo
+# - user: Usuario propietario de la biblioteca en Immich
+

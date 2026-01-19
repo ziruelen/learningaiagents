@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:latest
+    container_name: immich-server
+    volumes:
+      - ./library:/usr/src/app/upload
+      # External libraries (read-only para proteger archivos originales)
+      - /mnt/nas/fotos_antiguas:/mnt/nas/fotos_antiguas:ro
+      - /mnt/nas/videos_antiguos:/mnt/nas/videos_antiguos:ro
+      # Migración desde Google Photos
+      - /mnt/storage/google_photos_migrated:/mnt/storage/google_photos_migrated:ro
+    environment:
+      - IMMICH_MACHINE_LEARNING_ENABLED=true
+      - IMMICH_MACHINE_LEARNING_URL=http://immich-machine-learning:3003
+      # Modelo CLIP más potente (requiere más RAM)
+      - IMMICH_CLIP_MODEL=ViT-L-14
+      # O modelo más ligero para hardware modesto
+      # - IMMICH_CLIP_MODEL=ViT-B-32
+      - IMMICH_EXTERNAL_LIBRARY_WATCH_ENABLED=true  # File watching experimental
+      - IMMICH_CONCURRENT_JOBS=4
+    ports:
+      - "2283:2283"
+    depends_on:
+      - immich-postgres
+      - immich-redis
+      - immich-machine-learning
+    restart: unless-stopped
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:latest
+    container_name: immich-machine-learning
+    volumes:
+      - model-cache:/cache
+    environment:
+      - MODEL_CACHE_DIR=/cache
+      # Optimización de reconocimiento facial
+      - FACE_RECOGNITION_MIN_SCORE=0.6
+      - FACE_RECOGNITION_MAX_DISTANCE=0.4
+      # GPU si está disponible (descomentar si tienes GPU)
+      # - CUDA_VISIBLE_DEVICES=0
+    deploy:
+      resources:
+        # Reservar más recursos para ML
+        limits:
+          cpus: '4'
+          memory: 8G
+        # GPU (descomentar si tienes GPU NVIDIA)
+        # reservations:
+        #   devices:
+        #     - driver: nvidia
+        #       count: 1
+        #       capabilities: [gpu]
+    restart: unless-stopped
+
+  immich-web:
+    image: ghcr.io/immich-app/immich-web:latest
+    container_name: immich-web
+    restart: unless-stopped
+
+  immich-postgres:
+    image: postgres:15-alpine
+    container_name: immich-postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=immich
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=immich
+    restart: unless-stopped
+
+  immich-redis:
+    image: redis:7-alpine
+    container_name: immich-redis
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+  model-cache:
+

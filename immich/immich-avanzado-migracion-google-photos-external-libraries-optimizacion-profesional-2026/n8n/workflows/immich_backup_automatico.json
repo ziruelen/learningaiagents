@@ -1,0 +1,117 @@
+{
+  "name": "Immich Backup Automático",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://immich.tu-dominio.com/api/asset",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "headers": {
+            "X-API-KEY": "={{ $credentials.immichApiKey }}"
+          }
+        }
+      },
+      "name": "Obtener Assets Nuevos",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "type": "dateTime"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.createdAt }}",
+              "rightValue": "={{ $now.minus({days: 7}) }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "smaller"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Filtrar Últimos 7 Días",
+      "type": "n8n-nodes-base.if",
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://immich.tu-dominio.com/api/asset/{{ $json.id }}/download",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "name": "Descargar Asset",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://s3.tu-dominio.com/immich-backups/{{ $json.id }}",
+        "authentication": "genericCredentialType",
+        "options": {
+          "body": {
+            "body": "={{ $binary.data }}"
+          }
+        }
+      },
+      "name": "Subir a S3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Obtener Assets Nuevos": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Últimos 7 Días",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Últimos 7 Días": {
+      "main": [
+        [
+          {
+            "node": "Descargar Asset",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar Asset": {
+      "main": [
+        [
+          {
+            "node": "Subir a S3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
+
