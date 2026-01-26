@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    restart: unless-stopped
+    environment:
+      - COLLECTIONS=crowdsecurity/nginx crowdsecurity/linux crowdsecurity/docker
+      - GID=1000
+      - UID=1000
+    volumes:
+      - ./config:/etc/crowdsec
+      - ./data:/var/lib/crowdsec/data
+      - /var/log:/var/log/host:ro
+    networks:
+      - crowdsec
+
+  crowdsec-dashboard:
+    image: crowdsecurity/crowdsec-metabase:latest
+    container_name: crowdsec-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - CROWDSEC_LAPI_URL=http://crowdsec:8080
+    depends_on:
+      - crowdsec
+    networks:
+      - crowdsec
+
+  nginx-bouncer:
+    image: crowdsecurity/nginx-bouncer:latest
+    container_name: nginx-bouncer
+    restart: unless-stopped
+    environment:
+      - CROWDSEC_BOUNCER_KEY=${CROWDSEC_BOUNCER_KEY:-changeme}
+      - CROWDSEC_LAPI_URL=http://crowdsec:8080
+    volumes:
+      - ./config/nginx-bouncer.conf:/etc/nginx/conf.d/crowdsec.conf:ro
+    depends_on:
+      - crowdsec
+    networks:
+      - crowdsec
+
+networks:
+  crowdsec:
+    driver: bridge
+
+volumes:
+  data:
+

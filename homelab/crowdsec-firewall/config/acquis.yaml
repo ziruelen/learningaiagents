@@ -1,0 +1,14 @@
+source: file
+filenames:
+  - /var/log/host/nginx/access.log
+  - /var/log/host/nginx/error.log
+  - /var/log/host/auth.log
+labels:
+  type: nginx
+
+source: file
+filenames:
+  - /var/log/host/syslog
+labels:
+  type: syslog
+
