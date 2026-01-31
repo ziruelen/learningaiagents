@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  localai:
+    image: quay.io/go-skynet/local-ai:latest-cublas
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models
+      - ./config:/config
+    environment:
+      - MODELS_PATH=/models
+      - CONFIG_PATH=/config
+      - GPU_LAYERS: 35  # Capas en GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+

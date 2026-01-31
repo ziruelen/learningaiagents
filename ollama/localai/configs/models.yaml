@@ -1,0 +1,39 @@
+# Configuración de modelos para LocalAI
+# Coloca este archivo en ./config/models.yaml
+
+- name: gpt-4
+  backend: llama-cpp
+  parameters:
+    model: /models/llama-2-7b-chat.gguf
+    f16: true
+    threads: 4
+    context_size: 4096
+  capabilities:
+    chat: true
+    embeddings: false
+
+# Ejemplo con modelo más pequeño (para CPU)
+- name: gpt-3.5-turbo
+  backend: llama-cpp
+  parameters:
+    model: /models/llama-2-7b-chat-q4_0.gguf
+    f16: false
+    threads: 2
+    context_size: 2048
+  capabilities:
+    chat: true
+    embeddings: false
+
+# Ejemplo con GPU (usar imagen latest-cublas)
+- name: gpt-4-turbo
+  backend: llama-cpp
+  parameters:
+    model: /models/llama-2-13b-chat.gguf
+    f16: true
+    threads: 8
+    context_size: 4096
+    gpu_layers: 35
+  capabilities:
+    chat: true
+    embeddings: false
+
