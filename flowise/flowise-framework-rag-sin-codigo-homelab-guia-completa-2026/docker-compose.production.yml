@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: flowise_postgres
+    environment:
+      - POSTGRES_DB=flowise
+      - POSTGRES_USER=flowise
+      - POSTGRES_PASSWORD=changeme
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - flowise_network
+
+  flowise:
+    image: flowiseai/flowise:latest
+    container_name: flowise
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATABASE_PATH=postgresql://flowise:changeme@postgres:5432/flowise
+      - FLOWISE_USERNAME=admin
+      - FLOWISE_PASSWORD=changeme
+      - SECRETKEY_PATH=/root/.flowise/.flowise
+    depends_on:
+      - postgres
+    volumes:
+      - flowise_data:/root/.flowise
+    restart: unless-stopped
+    networks:
+      - flowise_network
+
+volumes:
+  postgres_data:
+  flowise_data:
+
+networks:
+  flowise_network:
+    driver: bridge
+
