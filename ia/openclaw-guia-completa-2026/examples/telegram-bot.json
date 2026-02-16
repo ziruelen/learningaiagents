@@ -1,0 +1,48 @@
+{
+  "name": "OpenClaw Telegram Bot",
+  "description": "Configuración de ejemplo para integrar OpenClaw con Telegram",
+  "version": "1.0.0",
+  "config": {
+    "telegram": {
+      "bot_token": "${TELEGRAM_BOT_TOKEN}",
+      "webhook_url": "https://tu-dominio.com/webhook/telegram",
+      "enabled": true
+    },
+    "openclaw": {
+      "api_key": "${ANTHROPIC_API_KEY}",
+      "model": "claude-3-5-sonnet-20241022",
+      "temperature": 0.7,
+      "max_tokens": 4096
+    },
+    "tools": {
+      "execute_command": true,
+      "read_file": true,
+      "write_file": true,
+      "web_search": true,
+      "api_call": true
+    },
+    "security": {
+      "allowed_users": [],
+      "allowed_commands": [
+        "ls",
+        "cat",
+        "grep",
+        "curl",
+        "ping"
+      ],
+      "blocked_commands": [
+        "rm -rf",
+        "sudo",
+        "dd"
+      ]
+    }
+  },
+  "instructions": [
+    "1. Obtén un bot token de @BotFather en Telegram",
+    "2. Configura TELEGRAM_BOT_TOKEN en tu archivo .env",
+    "3. Configura ANTHROPIC_API_KEY o OPENAI_API_KEY",
+    "4. Inicia OpenClaw con: openclaw start",
+    "5. El bot responderá automáticamente a mensajes en Telegram"
+  ]
+}
+

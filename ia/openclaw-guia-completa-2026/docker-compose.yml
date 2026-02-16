@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  openclaw:
+    image: openclaw/openclaw:latest
+    container_name: openclaw
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
+      - NODE_ENV=production
+      - OPENCLAW_PORT=3000
+      - OPENCLAW_HOST=0.0.0.0
+      - OPENCLAW_LOG_LEVEL=info
+    volumes:
+      - ./data:/app/data
+      - ./configs:/app/config
+      - ./logs:/app/logs
+    networks:
+      - openclaw-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  openclaw-network:
+    driver: bridge
+
+volumes:
+  openclaw-data:
+    driver: local
+
