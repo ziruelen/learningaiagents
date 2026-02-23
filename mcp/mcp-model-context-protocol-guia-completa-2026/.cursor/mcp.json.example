@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "minimal": {
+      "command": "/ruta/absoluta/al/venv/bin/python",
+      "args": ["/ruta/absoluta/al/repo/mcp-minimal/server_minimal.py"],
+      "cwd": "/ruta/absoluta/al/repo/mcp-minimal"
+    },
+    "with-resource": {
+      "command": "uv",
+      "args": ["--directory", "/ruta/absoluta/al/repo/mcp-with-resource", "run", "server_with_resource.py"]
+    },
+    "read-file": {
+      "command": "/ruta/absoluta/al/venv/bin/python",
+      "args": ["/ruta/absoluta/al/repo/mcp-useful-tool/server_read_file.py"],
+      "cwd": "/ruta/absoluta/al/repo/mcp-useful-tool"
+    }
+  }
+}
