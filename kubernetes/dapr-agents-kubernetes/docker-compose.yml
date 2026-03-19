@@ -1,0 +1,3 @@
+services:
+  dapr-placement:
+    image: daprio/dapr
