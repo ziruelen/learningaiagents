@@ -1,0 +1,14 @@
+services:
+  agent-framework-demo:
+    image: python:3.11-slim
+    working_dir: /app
+    environment:
+      # Variables usadas por los snippets de Microsoft Learn (ajusta a tu proveedor)
+      AZURE_AI_PROJECT_ENDPOINT: ${AZURE_AI_PROJECT_ENDPOINT:-https://example-endpoint.invalid}
+      AZURE_OPENAI_RESPONSES_DEPLOYMENT_NAME: ${AZURE_OPENAI_RESPONSES_DEPLOYMENT_NAME:-gpt-4o-mini}
+      # Credencial tipica: AzureCliCredential (necesitas login via az cli en tu host o dentro del contenedor)
+      # Si no usas Azure, cambia el client por el provider correspondiente.
+    volumes:
+      - ./:/app
+    command: ["bash", "-lc", "./scripts/run_python_demo.sh"]
+
