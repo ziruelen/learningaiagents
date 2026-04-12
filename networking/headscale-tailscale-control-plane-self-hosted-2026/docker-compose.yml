@@ -1,6 +1,11 @@
-# Plantilla mínima: sustituye por la imagen oficial del artículo.
 services:
-  app:
-    image: alpine:3.20
-    command: ["sleep", "infinity"]
+  headscale:
+    image: headscale/headscale:${HEADSCALE_VERSION:-0.25.1}
+    container_name: headscale
     restart: unless-stopped
+    command: serve
+    volumes:
+      - ./config:/etc/headscale
+      - ./data:/var/lib/headscale
+    ports:
+      - "${HEADSCALE_PORT:-8080}:8080"
