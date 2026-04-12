@@ -1,6 +1,17 @@
-# Plantilla mínima: sustituye por la imagen oficial del artículo.
+# Vane (upstream del proyecto conocido como Perplexica) — referencia alineada con
+# https://github.com/ItzCrazyKns/Vane/blob/master/docker-compose.yaml
 services:
-  app:
-    image: alpine:3.20
-    command: ["sleep", "infinity"]
+  vane:
+    image: itzcrazykns1337/vane:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - vane-data:/home/vane/data
     restart: unless-stopped
+    # Descomenta si usas slim + SearXNG externo:
+    # environment:
+    #   - SEARXNG_API_URL=http://searxng:8080
+
+volumes:
+  vane-data:
+    name: vane-data
