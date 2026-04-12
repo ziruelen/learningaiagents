@@ -1,6 +1,25 @@
-# Plantilla mínima: sustituye por la imagen oficial del artículo.
+# Text Generation Inference (TGI) — ejemplo homelab
+# Documentación: https://huggingface.co/docs/text-generation-inference/quicktour
+# Requiere NVIDIA Container Toolkit y GPU compatible.
 services:
-  app:
-    image: alpine:3.20
-    command: ["sleep", "infinity"]
+  tgi:
+    image: ghcr.io/huggingface/text-generation-inference:3.3.5
+    command: --model-id ${MODEL_ID:-HuggingFaceH4/zephyr-7b-beta}
+    ports:
+      - "${TGI_PORT:-8080}:80"
+    volumes:
+      - hf-cache:/data
+    shm_size: "1gb"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - HF_TOKEN=${HF_TOKEN:-}
     restart: unless-stopped
+
+volumes:
+  hf-cache:
