@@ -1,6 +1,19 @@
-# Plantilla mínima: sustituye por la imagen oficial del artículo.
+# LiteLLM Proxy — homelab (abril 2026). Ajusta variables en .env (no commitear secretos).
+# Documentación: https://docs.litellm.ai/docs/proxy/docker_quick_start
+
 services:
-  app:
-    image: alpine:3.20
-    command: ["sleep", "infinity"]
+  litellm:
+    image: docker.litellm.ai/berriai/litellm:main-latest
+    container_name: litellm-proxy
     restart: unless-stopped
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./litellm_config.yaml:/app/config.yaml:ro
+    environment:
+      OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?definir master key sk-...}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: ["--config", "/app/config.yaml"]

@@ -1,0 +1,17 @@
+# Copiar a litellm_config.yaml y editar. Sin secretos en claro: usar os.environ/VAR
+# https://docs.litellm.ai/docs/proxy/configs
+
+model_list:
+  - model_name: local-mistral
+    litellm_params:
+      model: ollama/mistral
+      api_base: os.environ/OLLAMA_API_BASE
+  # Descomenta si quieres modelo cloud además del local:
+  # - model_name: gpt-4o-mini
+  #   litellm_params:
+  #     model: gpt-4o-mini
+  #     api_key: os.environ/OPENAI_API_KEY
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  # database_url: "postgresql://..."  # opcional: virtual keys / UI admin avanzada
