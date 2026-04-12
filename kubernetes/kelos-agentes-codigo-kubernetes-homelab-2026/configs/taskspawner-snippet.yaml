@@ -1,0 +1,10 @@
+# FRAGMENTO ILUSTRATIVO — no aplicar sin fusionar con manifiestos oficiales de kelos-dev/kelos
+# Patrón: TaskSpawner con maxConcurrency y etiquetas GitHub (ejemplo recortado del README público)
+apiVersion: kelos.dev/v1alpha1
+kind: TaskSpawner
+metadata:
+  name: example-lab-spawner
+  namespace: kelos-lab
+spec:
+  maxConcurrency: 1
+  # when: ... (definir según docs oficiales y credenciales GitHub)
