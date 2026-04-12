@@ -1,0 +1,16 @@
+# Fragmentos para combinar con helm -f (NO son un values completo).
+# Documentación: https://kagent.dev/docs/kagent/resources/helm
+
+# Ejemplo: desactivar kmcp embebido si ya tienes kmcp externo (desde v0.7+ va activo por defecto).
+# kmcp:
+#   enabled: false
+
+# Ejemplo: proveedor Ollama (sin API key en el snippet público de la doc).
+# providers:
+#   default: ollama
+
+# Ejemplo: variable de entorno en el controller.
+# controller:
+#   env:
+#     - name: KAGENT_CONTROLLER_NAME
+#       value: my-kagent
