@@ -1,6 +1,0 @@
-# Plantilla mínima: sustituye por la imagen oficial del artículo.
-services:
-  app:
-    image: alpine:3.20
-    command: ["sleep", "infinity"]
-    restart: unless-stopped

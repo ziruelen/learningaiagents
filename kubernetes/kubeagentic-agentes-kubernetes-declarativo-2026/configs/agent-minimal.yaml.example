@@ -1,0 +1,13 @@
+# Ejemplo ilustrativo — NO es un contrato de compatibilidad entre versiones.
+# Valida siempre contra el esquema y los ejemplos del README / guías oficiales del día de instalación.
+
+version: "1"
+name: demo-agent
+description: "Agente mínimo para laboratorio"
+model:
+  provider: openai
+  name: gpt-4o-mini
+  temperature: 0.2
+tools: []
+limits:
+  max_tokens: 1024
