@@ -1,0 +1,8 @@
+retrieval:
+  bm25_weight: 0.45
+  vector_weight: 0.35
+  graph_weight: 0.20
+  top_k_bm25: 8
+  top_k_vector: 8
+  top_k_graph: 5
+  rerank_top_k: 10
