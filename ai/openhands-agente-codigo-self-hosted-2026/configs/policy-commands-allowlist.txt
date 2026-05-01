@@ -1,0 +1,8 @@
+# Comandos sugeridos (ajusta según tu riesgo)
+ls
+pwd
+git status
+git diff
+pytest
+npm test
+ruff check
