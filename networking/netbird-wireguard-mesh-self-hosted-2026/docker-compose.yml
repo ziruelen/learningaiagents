@@ -1,0 +1,7 @@
+services:
+  netbird:
+    image: netbirdio/netbird:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
