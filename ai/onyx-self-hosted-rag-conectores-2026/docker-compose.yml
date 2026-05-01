@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "${REDIS_PORT}:6379"
+
+  onyx:
+    image: onyxdotapp/onyx:latest
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "${ONYX_PORT}:3000"
