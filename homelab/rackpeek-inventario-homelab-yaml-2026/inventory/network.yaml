@@ -1,0 +1,9 @@
+network:
+  vlans:
+    - id: 10
+      name: mgmt
+      cidr: 10.10.10.0/24
+      gateway: 10.10.10.1
+  dns:
+    primary: 10.10.10.2
+    secondary: 10.10.10.3

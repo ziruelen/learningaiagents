@@ -1,0 +1,11 @@
+services:
+  - name: grafana
+    host: k3s-master-01
+    port: 3000
+    owner: platform
+    backup: true
+  - name: prometheus
+    host: k3s-master-01
+    port: 9090
+    owner: platform
+    backup: true

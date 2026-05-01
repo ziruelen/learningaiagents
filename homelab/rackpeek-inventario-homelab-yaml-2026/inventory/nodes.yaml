@@ -1,0 +1,11 @@
+nodes:
+  - name: proxmox-01
+    role: hypervisor
+    os: debian
+    ip: 10.10.10.11
+    tags: [kvm, storage, critical]
+  - name: k3s-master-01
+    role: kubernetes-control-plane
+    os: ubuntu
+    ip: 10.10.10.21
+    tags: [k3s, apps]
